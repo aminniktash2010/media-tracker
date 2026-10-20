@@ -151,16 +151,66 @@
     <!-- Dynamic Media Grid -->
     <section class="media-grid" id="media-grid" aria-live="polite"></section>
 
-    <!-- Recommendation & Idea Prompts -->
-    <section class="prompts-card">
-      <div class="prompts-header">
-        <div class="prompts-title-group">
-          <span>💡</span>
-          <span class="prompts-title">Curator Prompts</span>
+    <!-- AI Cinema Curator & Interactive Chat Assistant -->
+    <section class="ai-curator-card" id="ai-curator-section" aria-label="AI Cinema Curator">
+      <div class="ai-curator-header">
+        <div class="ai-curator-title-group">
+          <div class="ai-curator-icon">✨</div>
+          <div>
+            <div class="ai-curator-badge-row">
+              <h3 class="ai-curator-title">AI Cinema Curator</h3>
+              <span class="ai-live-badge">Online • 125+ Titles Indexed</span>
+            </div>
+            <p class="ai-curator-subtitle">Ask questions, get personalized watchlist recommendations, or explore deep cuts</p>
+          </div>
         </div>
-        <span class="prompts-hint">Tap any prompt to copy inspiration</span>
+        <div class="ai-curator-header-actions">
+          <button type="button" id="btn-clear-chat" class="btn btn-ghost btn-sm" title="Clear chat history">Clear Chat</button>
+        </div>
       </div>
-      <div class="prompts-chips" id="prompts-chips"></div>
+
+      <!-- Quick Inspiration Prompts (Click to ask AI) -->
+      <div class="ai-prompt-chips-wrapper">
+        <span class="ai-prompt-label">💡 Prompts:</span>
+        <div class="ai-prompts-chips" id="prompts-chips"></div>
+      </div>
+
+      <!-- Chat History Area -->
+      <div class="ai-chat-history" id="ai-chat-history">
+        <!-- Initial assistant greeting -->
+        <div class="chat-message assistant-message">
+          <div class="chat-avatar">✨</div>
+          <div class="chat-bubble">
+            <p>Hello Amin! I'm your <strong>AI Cinema Curator</strong>. I have indexed your entire curated catalog, directors, ratings, and TMDB intelligence.</p>
+            <p>Ask me what to watch tonight, request recommendations based on a mood (e.g. <em>atmospheric slow-burn sci-fi</em>), or ask for deep cuts by directors like <strong>Denis Villeneuve</strong>, <strong>Christopher Nolan</strong>, or <strong>Wong Kar-wai</strong>! Any recommended title can be added directly to your watchlist.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="chat-typing-indicator" id="chat-typing-indicator" style="display: none;">
+        <div class="chat-avatar">✨</div>
+        <div class="typing-bubble">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-text">AI Curator is thinking…</span>
+        </div>
+      </div>
+
+      <!-- Chat Input Toolbar -->
+      <form id="ai-chat-form" class="ai-chat-input-bar">
+        <input 
+          type="text" 
+          id="ai-chat-input" 
+          class="ai-chat-input" 
+          placeholder="Ask AI Curator (e.g. 'What should I watch if I love Severance?', 'Find me a 90s slow burn')…" 
+          autocomplete="off"
+        >
+        <button type="submit" class="btn btn-primary btn-chat-send" id="btn-chat-send">
+          <span>Ask</span> <span>➤</span>
+        </button>
+      </form>
     </section>
 
   </main>
@@ -174,9 +224,17 @@
       </div>
 
       <form id="modal-form" class="modal-form">
-        <div class="form-group">
-          <label for="input-title" class="form-label">Title</label>
-          <input type="text" id="input-title" class="form-input" placeholder="e.g. Severance, Dune: Part Two" required>
+        <div class="form-group form-group-autocomplete">
+          <label for="input-title" class="form-label">
+            <span>Title</span>
+            <span class="form-hint-pill">Type for smart autocomplete & fuzzy suggestions</span>
+          </label>
+          <div class="input-autocomplete-wrapper">
+            <input type="text" id="input-title" class="form-input" placeholder="e.g. Severance, Dune: Part Two, Oppenheimer…" autocomplete="off" required>
+            <span id="title-search-spinner" class="input-spinner" style="display: none;"></span>
+          </div>
+          <!-- Live Autocomplete & Fuzzy Suggestion Dropdown -->
+          <div id="title-autocomplete-dropdown" class="autocomplete-dropdown" style="display: none;"></div>
         </div>
 
         <div class="form-row">
@@ -266,21 +324,26 @@
       </div>
 
       <div class="director-modal-body">
-        <!-- Search bar for director -->
-        <form id="director-search-form" class="director-search-form">
-          <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input 
-              type="text" 
-              id="director-search-input" 
-              class="search-input" 
-              placeholder="e.g. Denis Villeneuve, Christopher Nolan, Hayao Miyazaki, David Lynch…" 
-              autocomplete="off"
-              required
-            >
-          </div>
-          <button type="submit" class="btn btn-primary" id="btn-search-director">Search</button>
-        </form>
+        <!-- Search bar for director with live autocomplete -->
+        <div class="director-search-container">
+          <form id="director-search-form" class="director-search-form">
+            <div class="search-wrapper search-wrapper-autocomplete">
+              <span class="search-icon">🔍</span>
+              <input 
+                type="text" 
+                id="director-search-input" 
+                class="search-input" 
+                placeholder="e.g. Denis Villeneuve, Christopher Nolan, Hayao Miyazaki, David Lynch…" 
+                autocomplete="off"
+                required
+              >
+              <span id="director-search-spinner" class="input-spinner" style="display: none;"></span>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-search-director">Search</button>
+          </form>
+          <!-- Live Director Autocomplete Dropdown -->
+          <div id="director-autocomplete-dropdown" class="autocomplete-dropdown" style="display: none;"></div>
+        </div>
 
         <!-- Loading state -->
         <div id="director-loading-state" class="director-loading-state" style="display: none;">

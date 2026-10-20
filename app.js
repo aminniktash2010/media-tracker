@@ -28,6 +28,9 @@
       this.activeDetailItem = null;
       this.pendingDirectorCredits = [];
       this.pendingDirectorPerson = null;
+      this.titleAutocompleteTimer = null;
+      this.directorAutocompleteTimer = null;
+      this.isAiThinking = false;
       this.toastTimer = null;
 
       this.cacheDOM();
@@ -138,8 +141,10 @@
         modalTitle: document.getElementById('modal-title'),
         modalForm: document.getElementById('modal-form'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
-        modalCancelBtn: document.getElementById('modal-cancel-btn'),
+        // Add/Edit Modal Autocomplete
         inputTitle: document.getElementById('input-title'),
+        titleAutocompleteDropdown: document.getElementById('title-autocomplete-dropdown'),
+        titleSearchSpinner: document.getElementById('title-search-spinner'),
         inputYear: document.getElementById('input-year'),
         inputImdbId: document.getElementById('input-imdb'),
         inputDirector: document.getElementById('input-director'),
@@ -169,6 +174,8 @@
         directorModalCancelBtn: document.getElementById('director-modal-cancel-btn'),
         directorSearchForm: document.getElementById('director-search-form'),
         directorSearchInput: document.getElementById('director-search-input'),
+        directorSearchSpinner: document.getElementById('director-search-spinner'),
+        directorAutocompleteDropdown: document.getElementById('director-autocomplete-dropdown'),
         btnSearchDirector: document.getElementById('btn-search-director'),
         directorLoadingState: document.getElementById('director-loading-state'),
         directorLoadingText: document.getElementById('director-loading-text'),
@@ -183,6 +190,14 @@
         filmographyChecklist: document.getElementById('filmography-checklist'),
         btnConfirmImportCredits: document.getElementById('btn-confirm-import-credits'),
         importBtnLabel: document.getElementById('import-btn-label'),
+
+        // AI Cinema Curator Elements
+        aiChatHistory: document.getElementById('ai-chat-history'),
+        chatTypingIndicator: document.getElementById('chat-typing-indicator'),
+        aiChatForm: document.getElementById('ai-chat-form'),
+        aiChatInput: document.getElementById('ai-chat-input'),
+        btnChatSend: document.getElementById('btn-chat-send'),
+        btnClearChat: document.getElementById('btn-clear-chat'),
 
         btnExportCsv: document.getElementById('btn-export-csv'),
         btnExportJson: document.getElementById('btn-export-json'),
@@ -313,9 +328,44 @@
         this.dom.btnConfirmImportCredits.addEventListener('click', () => this.importSelectedCredits());
       }
 
+      // Live Autocomplete for Title & Director
+      if (this.dom.inputTitle) {
+        this.dom.inputTitle.addEventListener('input', (e) => this.handleTitleAutocomplete(e.target.value));
+        this.dom.inputTitle.addEventListener('focus', (e) => {
+          if (e.target.value.trim().length >= 2) this.handleTitleAutocomplete(e.target.value);
+        });
+      }
+
+      if (this.dom.directorSearchInput) {
+        this.dom.directorSearchInput.addEventListener('input', (e) => this.handleDirectorAutocomplete(e.target.value));
+        this.dom.directorSearchInput.addEventListener('focus', (e) => {
+          if (e.target.value.trim().length >= 2) this.handleDirectorAutocomplete(e.target.value);
+        });
+      }
+
+      // Close autocomplete dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.form-group-autocomplete') && !e.target.closest('.director-search-container')) {
+          this.closeAllAutocompletes();
+        }
+      });
+
+      // AI Cinema Curator Chat Form Events
+      if (this.dom.aiChatForm) {
+        this.dom.aiChatForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.handleChatSubmit();
+        });
+      }
+
+      if (this.dom.btnClearChat) {
+        this.dom.btnClearChat.addEventListener('click', () => this.clearChat());
+      }
+
       // Universal Keyboard Navigation (Escape closes any open modal)
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          this.closeAllAutocompletes();
           if (this.dom.directorModalBackdrop && this.dom.directorModalBackdrop.classList.contains('open')) {
             this.closeDirectorModal();
           } else if (this.dom.detailsBackdrop.classList.contains('open')) {
@@ -347,8 +397,15 @@
       prompts.forEach((prompt) => {
         const btn = document.createElement('button');
         btn.className = 'chip-btn';
+        btn.type = 'button';
         btn.textContent = prompt;
-        btn.addEventListener('click', () => this.copyPrompt(prompt));
+        btn.addEventListener('click', () => {
+          this.sendChatMessage(prompt);
+          const aiSection = document.getElementById('ai-curator-section');
+          if (aiSection) {
+            aiSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
         this.dom.promptsContainer.appendChild(btn);
       });
     }
@@ -380,6 +437,7 @@
       if (this.dom.inputDirector) this.dom.inputDirector.value = this.activeDirector || '';
       this.dom.inputType.value = 'movie';
       if (this.dom.inputPoster) this.dom.inputPoster.value = '';
+      this.closeAllAutocompletes();
       this.dom.modalBackdrop.classList.add('open');
       setTimeout(() => this.dom.inputTitle.focus(), 100);
     }
@@ -396,11 +454,13 @@
       if (this.dom.inputDirector) this.dom.inputDirector.value = item.director || '';
       this.dom.inputType.value = item.type;
       if (this.dom.inputPoster) this.dom.inputPoster.value = item.poster || '';
+      this.closeAllAutocompletes();
       this.dom.modalBackdrop.classList.add('open');
       setTimeout(() => this.dom.inputTitle.focus(), 100);
     }
 
     closeModal() {
+      this.closeAllAutocompletes();
       this.dom.modalBackdrop.classList.remove('open');
       this.editingId = null;
     }
@@ -1367,6 +1427,593 @@
         }
       };
       reader.readAsText(file);
+    }
+
+    /* ==========================================================================
+       Smart Autocomplete & Fuzzy Suggestion Engine
+       ========================================================================== */
+
+    closeAllAutocompletes() {
+      if (this.dom.titleAutocompleteDropdown) {
+        this.dom.titleAutocompleteDropdown.style.display = 'none';
+        this.dom.titleAutocompleteDropdown.innerHTML = '';
+      }
+      if (this.dom.directorAutocompleteDropdown) {
+        this.dom.directorAutocompleteDropdown.style.display = 'none';
+        this.dom.directorAutocompleteDropdown.innerHTML = '';
+      }
+      if (this.dom.titleSearchSpinner) this.dom.titleSearchSpinner.style.display = 'none';
+      if (this.dom.directorSearchSpinner) this.dom.directorSearchSpinner.style.display = 'none';
+    }
+
+    handleTitleAutocomplete(rawQuery) {
+      const query = (rawQuery || '').trim();
+      if (this.titleAutocompleteTimer) clearTimeout(this.titleAutocompleteTimer);
+
+      if (query.length < 2) {
+        this.closeAllAutocompletes();
+        return;
+      }
+
+      if (this.dom.titleSearchSpinner) this.dom.titleSearchSpinner.style.display = 'block';
+
+      this.titleAutocompleteTimer = setTimeout(async () => {
+        try {
+          const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+          const res = await fetch(`https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}&api_key=${apiKey}`);
+          if (!res.ok) throw new Error('Network error');
+          const data = await res.json();
+          
+          if (this.dom.titleSearchSpinner) this.dom.titleSearchSpinner.style.display = 'none';
+
+          const results = (data.results || [])
+            .filter((item) => (item.media_type === 'movie' || item.media_type === 'tv') && (item.title || item.name))
+            .slice(0, 6);
+
+          this.renderTitleAutocomplete(results, query);
+        } catch (e) {
+          if (this.dom.titleSearchSpinner) this.dom.titleSearchSpinner.style.display = 'none';
+          console.warn('Title autocomplete error:', e);
+        }
+      }, 250);
+    }
+
+    renderTitleAutocomplete(results, originalQuery) {
+      const dropdown = this.dom.titleAutocompleteDropdown;
+      if (!dropdown) return;
+
+      dropdown.innerHTML = '';
+
+      if (results.length === 0) {
+        dropdown.innerHTML = `
+          <div class="autocomplete-empty">
+            No exact matches for "${originalQuery}". You can enter custom details below.
+          </div>
+        `;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      const header = document.createElement('div');
+      header.className = 'autocomplete-header';
+      header.textContent = 'Suggestions (Click to Auto-fill Details)';
+      dropdown.appendChild(header);
+
+      results.forEach((item) => {
+        const title = item.title || item.name;
+        const year = (item.release_date || item.first_air_date || '').slice(0, 4) || '—';
+        const isTv = item.media_type === 'tv';
+        const rating = item.vote_average ? (Math.round(item.vote_average * 10) / 10).toFixed(1) : null;
+        const posterUrl = item.poster_path 
+          ? `https://image.tmdb.org/t/p/w92${item.poster_path}`
+          : 'https://via.placeholder.com/34x50?text=No+Poster';
+
+        const row = document.createElement('div');
+        row.className = 'autocomplete-item';
+
+        row.innerHTML = `
+          <img class="autocomplete-poster" src="${posterUrl}" alt="${title}">
+          <div class="autocomplete-info">
+            <div class="autocomplete-title-row">
+              <span class="autocomplete-title">${title}</span>
+              <span class="badge badge-type" style="font-size: 0.65rem; padding: 0.1rem 0.35rem;">${isTv ? 'TV' : 'MOVIE'}</span>
+            </div>
+            <div class="autocomplete-meta">
+              <span>${year}</span>
+              ${rating ? `<span>•</span> <span style="color: #fbbf24;">★ ${rating}</span>` : ''}
+              ${item.overview ? `<span>•</span> <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">${item.overview}</span>` : ''}
+            </div>
+          </div>
+        `;
+
+        row.addEventListener('click', () => {
+          this.selectTitleSuggestion(item);
+        });
+
+        dropdown.appendChild(row);
+      });
+
+      dropdown.style.display = 'block';
+    }
+
+    async selectTitleSuggestion(item) {
+      const title = item.title || item.name;
+      const year = (item.release_date || item.first_air_date || '').slice(0, 4) || String(new Date().getFullYear());
+      const isTv = item.media_type === 'tv';
+      const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
+
+      this.dom.inputTitle.value = title;
+      this.dom.inputYear.value = year;
+      this.dom.inputType.value = isTv ? 'tv' : 'movie';
+      if (this.dom.inputPoster) this.dom.inputPoster.value = poster;
+
+      this.closeAllAutocompletes();
+
+      // Fetch external IDs and credits to auto-fill IMDb ID and Director
+      if (this.dom.titleSearchSpinner) this.dom.titleSearchSpinner.style.display = 'block';
+
+      try {
+        const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+        const typeEndpoint = isTv ? 'tv' : 'movie';
+        const res = await fetch(`https://api.themoviedb.org/3/${typeEndpoint}/${item.id}?api_key=${apiKey}&append_to_response=external_ids,credits`);
+        if (res.ok) {
+          const details = await res.json();
+          const imdbId = details.external_ids?.imdb_id;
+          if (imdbId) {
+            this.dom.inputImdbId.value = imdbId;
+          }
+
+          let directorName = '';
+          if (!isTv) {
+            const directingCrew = (details.credits?.crew || []).filter((c) => c.job === 'Director');
+            if (directingCrew.length > 0) {
+              directorName = directingCrew.map((c) => c.name).slice(0, 2).join(', ');
+            }
+          } else {
+            const creators = (details.created_by || []).map((c) => c.name);
+            const directingCrew = (details.credits?.crew || []).filter((c) => c.job === 'Director').map((c) => c.name);
+            directorName = creators.slice(0, 2).join(', ') || directingCrew.slice(0, 2).join(', ');
+          }
+
+          if (directorName && this.dom.inputDirector) {
+            this.dom.inputDirector.value = directorName;
+          }
+
+          this.showToast(`Auto-filled details for "${title}"! ✨`);
+        }
+      } catch (err) {
+        console.warn('Could not fetch extra details for suggestion:', err);
+      } finally {
+        if (this.dom.titleSearchSpinner) this.dom.titleSearchSpinner.style.display = 'none';
+      }
+    }
+
+    handleDirectorAutocomplete(rawQuery) {
+      const query = (rawQuery || '').trim();
+      if (this.directorAutocompleteTimer) clearTimeout(this.directorAutocompleteTimer);
+
+      if (query.length < 2) {
+        if (this.dom.directorAutocompleteDropdown) this.dom.directorAutocompleteDropdown.style.display = 'none';
+        if (this.dom.directorSearchSpinner) this.dom.directorSearchSpinner.style.display = 'none';
+        return;
+      }
+
+      if (this.dom.directorSearchSpinner) this.dom.directorSearchSpinner.style.display = 'block';
+
+      this.directorAutocompleteTimer = setTimeout(async () => {
+        try {
+          const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+          const res = await fetch(`https://api.themoviedb.org/3/search/person?query=${encodeURIComponent(query)}&api_key=${apiKey}`);
+          if (!res.ok) throw new Error('Network error');
+          const data = await res.json();
+
+          if (this.dom.directorSearchSpinner) this.dom.directorSearchSpinner.style.display = 'none';
+
+          const results = (data.results || []).slice(0, 5);
+          this.renderDirectorAutocomplete(results, query);
+        } catch (e) {
+          if (this.dom.directorSearchSpinner) this.dom.directorSearchSpinner.style.display = 'none';
+          console.warn('Director autocomplete error:', e);
+        }
+      }, 250);
+    }
+
+    renderDirectorAutocomplete(results, query) {
+      const dropdown = this.dom.directorAutocompleteDropdown;
+      if (!dropdown) return;
+
+      dropdown.innerHTML = '';
+
+      if (results.length === 0) {
+        dropdown.innerHTML = `
+          <div class="autocomplete-empty">
+            No director matches found for "${query}".
+          </div>
+        `;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      const header = document.createElement('div');
+      header.className = 'autocomplete-header';
+      header.textContent = 'Directors & Filmmakers';
+      dropdown.appendChild(header);
+
+      results.forEach((person) => {
+        const avatarUrl = person.profile_path
+          ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
+          : 'https://via.placeholder.com/38x38?text=Dir';
+        
+        const knownTitles = (person.known_for || [])
+          .map((k) => k.title || k.name)
+          .filter(Boolean)
+          .slice(0, 2)
+          .join(', ');
+
+        const row = document.createElement('div');
+        row.className = 'autocomplete-item';
+
+        row.innerHTML = `
+          <img class="autocomplete-avatar" src="${avatarUrl}" alt="${person.name}">
+          <div class="autocomplete-info">
+            <div class="autocomplete-title-row">
+              <span class="autocomplete-title">${person.name}</span>
+              <span class="badge badge-type" style="font-size: 0.65rem; padding: 0.1rem 0.35rem;">${person.known_for_department || 'Directing'}</span>
+            </div>
+            <div class="autocomplete-meta">
+              <span>Known for: ${knownTitles || 'Cinema & Television'}</span>
+            </div>
+          </div>
+        `;
+
+        row.addEventListener('click', () => {
+          this.selectDirectorSuggestion(person);
+        });
+
+        dropdown.appendChild(row);
+      });
+
+      dropdown.style.display = 'block';
+    }
+
+    selectDirectorSuggestion(person) {
+      this.dom.directorSearchInput.value = person.name;
+      this.closeAllAutocompletes();
+      this.loadDirectorFilmography(person);
+    }
+
+    /* ==========================================================================
+       AI Cinema Curator Engine & Interactive Chat
+       ========================================================================== */
+
+    handleChatSubmit() {
+      const input = this.dom.aiChatInput;
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      this.sendChatMessage(text);
+    }
+
+    clearChat() {
+      if (!this.dom.aiChatHistory) return;
+      this.dom.aiChatHistory.innerHTML = `
+        <div class="chat-message assistant-message">
+          <div class="chat-avatar">✨</div>
+          <div class="chat-bubble">
+            <p>Chat cleared. I'm ready for your next movie or TV inquiry!</p>
+          </div>
+        </div>
+      `;
+      this.showToast('Chat history cleared');
+    }
+
+    async sendChatMessage(userText) {
+      if (this.isAiThinking) return;
+      this.isAiThinking = true;
+
+      // Append user bubble
+      this.appendChatMessage('user', userText);
+
+      // Show typing indicator
+      if (this.dom.chatTypingIndicator) {
+        this.dom.chatTypingIndicator.style.display = 'flex';
+        this.scrollChatToBottom();
+      }
+
+      // Process query with intelligent curator engine
+      try {
+        const responseData = await this.processAiCuratorQuery(userText);
+        
+        // Brief natural delay for realistic curator feeling
+        await new Promise((resolve) => setTimeout(resolve, 600));
+
+        if (this.dom.chatTypingIndicator) {
+          this.dom.chatTypingIndicator.style.display = 'none';
+        }
+
+        this.appendChatMessage('assistant', responseData.text, responseData.recommendations);
+      } catch (err) {
+        console.error('AI Curator error:', err);
+        if (this.dom.chatTypingIndicator) {
+          this.dom.chatTypingIndicator.style.display = 'none';
+        }
+        this.appendChatMessage('assistant', "I'm having a brief issue accessing the film database, but you can explore our 125 curated titles directly using the category filters and director dropdown above!");
+      } finally {
+        this.isAiThinking = false;
+        this.scrollChatToBottom();
+      }
+    }
+
+    appendChatMessage(role, content, recommendations = []) {
+      const container = this.dom.aiChatHistory;
+      if (!container) return;
+
+      const messageEl = document.createElement('div');
+      messageEl.className = `chat-message ${role === 'user' ? 'user-message' : 'assistant-message'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'chat-avatar';
+      avatar.textContent = role === 'user' ? '👤' : '✨';
+      messageEl.appendChild(avatar);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+
+      // Convert line breaks and bold markdown
+      const formattedText = content
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+      bubble.innerHTML = `<p>${formattedText}</p>`;
+
+      // Render recommendations cards if available
+      if (recommendations && recommendations.length > 0) {
+        const recsGrid = document.createElement('div');
+        recsGrid.className = 'chat-recommendations';
+
+        recommendations.forEach((rec) => {
+          const card = document.createElement('div');
+          card.className = 'chat-rec-card';
+
+          const posterUrl = rec.poster || 'https://via.placeholder.com/44x64?text=Poster';
+          const isInWatchlist = this.titles.some(
+            (t) => (t.id === rec.id) || (t.title.toLowerCase() === rec.title.toLowerCase())
+          );
+
+          card.innerHTML = `
+            <img class="chat-rec-poster" src="${posterUrl}" alt="${rec.title}">
+            <div class="chat-rec-info">
+              <div class="chat-rec-title" title="${rec.title}">${rec.title}</div>
+              <div class="chat-rec-meta">
+                <span>${rec.year}</span>
+                <span>&bull;</span>
+                <span>${rec.director ? 'dir. ' + rec.director : (rec.type === 'tv' ? 'TV Series' : 'Movie')}</span>
+                ${rec.rating ? `<span>&bull;</span> <span style="color: #fbbf24;">★ ${rec.rating}</span>` : ''}
+              </div>
+            </div>
+          `;
+
+          const infoBox = card.querySelector('.chat-rec-info');
+          const actionBtn = document.createElement('button');
+          actionBtn.type = 'button';
+          actionBtn.className = `chat-rec-btn ${isInWatchlist ? 'added' : ''}`;
+          actionBtn.innerHTML = isInWatchlist ? 'In Watchlist ✓' : '<span>＋</span> Add to Watchlist';
+
+          if (!isInWatchlist) {
+            actionBtn.addEventListener('click', () => {
+              this.addRecommendationToWatchlist(rec, actionBtn);
+            });
+          } else {
+            actionBtn.addEventListener('click', () => {
+              const match = this.titles.find(
+                (t) => (t.id === rec.id) || (t.title.toLowerCase() === rec.title.toLowerCase())
+              );
+              if (match) this.openDetailModal(match);
+            });
+          }
+
+          infoBox.appendChild(actionBtn);
+          recsGrid.appendChild(card);
+        });
+
+        bubble.appendChild(recsGrid);
+      }
+
+      messageEl.appendChild(bubble);
+      container.appendChild(messageEl);
+      this.scrollChatToBottom();
+    }
+
+    scrollChatToBottom() {
+      if (this.dom.aiChatHistory) {
+        this.dom.aiChatHistory.scrollTop = this.dom.aiChatHistory.scrollHeight;
+      }
+    }
+
+    addRecommendationToWatchlist(rec, btnElement) {
+      const exists = this.titles.some(
+        (t) => (t.id === rec.id) || (t.title.toLowerCase() === rec.title.toLowerCase())
+      );
+
+      if (exists) {
+        btnElement.className = 'chat-rec-btn added';
+        btnElement.textContent = 'In Watchlist ✓';
+        this.showToast(`"${rec.title}" is already in your watchlist`);
+        return;
+      }
+
+      const newItem = {
+        id: rec.id || ('user_' + Date.now()),
+        imdbId: rec.imdbId || ('tt_rec_' + Date.now().toString().slice(-6)),
+        title: rec.title,
+        year: rec.year || String(new Date().getFullYear()),
+        director: rec.director || '',
+        type: rec.type || 'movie',
+        poster: rec.poster || '',
+        rating: rec.rating || undefined,
+        overview: rec.overview || '',
+        isNew: true,
+        watched: false,
+        addedAt: Date.now()
+      };
+
+      this.titles = [newItem, ...this.titles];
+      this.saveData();
+      this.render();
+
+      btnElement.className = 'chat-rec-btn added';
+      btnElement.textContent = 'Added ✓';
+      this.showToast(`Added "${rec.title}" to your watchlist! 🎬`);
+    }
+
+    async processAiCuratorQuery(rawQuery) {
+      const q = rawQuery.toLowerCase();
+      const unwatched = this.titles.filter((t) => !t.watched);
+
+      // 1. Check for Director specific queries
+      const directors = [
+        'nolan', 'villeneuve', 'lynch', 'wong kar-wai', 'wong kar wai',
+        'park chan-wook', 'park chan wook', 'tarantino', 'scorsese',
+        'kubrick', 'miyazaki', 'fincher', 'lanthimos', 'guadagnino',
+        'coen', 'bong joon-ho', 'bong joon ho', 'waititi'
+      ];
+
+      const matchedDirectorKey = directors.find((d) => q.includes(d));
+
+      if (matchedDirectorKey) {
+        const matchingCatalog = this.titles.filter((t) =>
+          (t.director || '').toLowerCase().includes(matchedDirectorKey)
+        );
+
+        if (matchingCatalog.length > 0) {
+          const dirName = matchingCatalog[0].director;
+          return {
+            text: `From your curated collection, here are outstanding works directed by **${dirName}**. You can click **Details** or filter directly by this director:`,
+            recommendations: matchingCatalog.slice(0, 4)
+          };
+        } else {
+          // Query TMDB for this director's filmography
+          try {
+            const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+            const sRes = await fetch(`https://api.themoviedb.org/3/search/person?query=${encodeURIComponent(matchedDirectorKey)}&api_key=${apiKey}`);
+            const sData = await sRes.json();
+            const person = sData.results?.[0];
+            if (person) {
+              const cRes = await fetch(`https://api.themoviedb.org/3/person/${person.id}/combined_credits?api_key=${apiKey}`);
+              const cData = await cRes.json();
+              const directed = (cData.crew || [])
+                .filter((c) => c.job === 'Director')
+                .sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
+                .slice(0, 3)
+                .map((c) => ({
+                  id: 'tmdb_' + c.id,
+                  imdbId: 'tmdb_' + c.id,
+                  title: c.title || c.name,
+                  year: (c.release_date || c.first_air_date || '').slice(0, 4),
+                  director: person.name,
+                  type: c.media_type === 'tv' ? 'tv' : 'movie',
+                  poster: c.poster_path ? `https://image.tmdb.org/t/p/w500${c.poster_path}` : '',
+                  rating: c.vote_average ? Math.round(c.vote_average * 10) / 10 : null,
+                  overview: c.overview || ''
+                }));
+
+              return {
+                text: `Here are acclaimed works by **${person.name}** discovered from the TMDB database. Tap **Add to Watchlist** on any title to immediately track it:`,
+                recommendations: directed
+              };
+            }
+          } catch (e) {
+            console.warn('TMDB director lookup error in chat:', e);
+          }
+        }
+      }
+
+      // 2. Unwatched / What to watch tonight / Next
+      if (q.includes('what to watch') || q.includes('tonight') || q.includes('next') || q.includes('unwatched')) {
+        const pool = unwatched.length > 0 ? unwatched : this.titles;
+        const sorted = [...pool].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        const pick = sorted.slice(0, 3);
+
+        return {
+          text: `Based on your watchlist progress, here are **${pick.length} top unwatched priorities** to enjoy tonight. Each title represents pinnacle storytelling and visionary directing:`,
+          recommendations: pick
+        };
+      }
+
+      // 3. Sci-fi / Atmospheric / Mind-bending
+      if (q.includes('sci-fi') || q.includes('space') || q.includes('slow burn') || q.includes('atmospheric') || q.includes('mind-bending')) {
+        const sciFiMatches = this.titles.filter((t) => {
+          const txt = `${t.title} ${t.overview} ${t.director}`.toLowerCase();
+          return txt.includes('space') || txt.includes('sci-fi') || txt.includes('future') || txt.includes('artificial') || txt.includes('dune') || txt.includes('interstellar') || txt.includes('severance');
+        });
+
+        const pool = sciFiMatches.length > 0 ? sciFiMatches : this.titles;
+        return {
+          text: `For lovers of **atmospheric, slow-burn, and mind-bending speculative fiction**, these cinematic journeys will completely absorb you:`,
+          recommendations: pool.slice(0, 3)
+        };
+      }
+
+      // 4. Arthouse / A24 / Criterion / Romance
+      if (q.includes('arthouse') || q.includes('a24') || q.includes('romance') || q.includes('eternal sunshine') || q.includes('lobster') || q.includes('criterion')) {
+        const arthouse = this.titles.filter((t) => t.type === 'community' || (t.overview && (t.overview.toLowerCase().includes('love') || t.overview.toLowerCase().includes('relationship'))));
+        const pool = arthouse.length > 0 ? arthouse : this.titles.slice(0, 3);
+        return {
+          text: `Here are **poetic, introspective arthouse classics** that celebrate mood, striking aesthetics, and emotional resonance:`,
+          recommendations: pool.slice(0, 3)
+        };
+      }
+
+      // 5. TV Series / HBO / FX
+      if (q.includes('tv') || q.includes('show') || q.includes('series') || q.includes('hbo') || q.includes('fx')) {
+        const tvList = this.titles.filter((t) => t.type === 'tv');
+        const pool = tvList.length > 0 ? tvList : this.titles;
+        return {
+          text: `Here are **prestige television masterpieces** characterized by world-class writing, exceptional performances, and auteur direction:`,
+          recommendations: pool.slice(0, 3)
+        };
+      }
+
+      // 6. Fallback / General search via TMDB discovery
+      try {
+        const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+        const res = await fetch(`https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(rawQuery)}&api_key=${apiKey}`);
+        if (res.ok) {
+          const data = await res.json();
+          const items = (data.results || [])
+            .filter((i) => (i.media_type === 'movie' || i.media_type === 'tv') && i.poster_path)
+            .slice(0, 3)
+            .map((i) => ({
+              id: 'tmdb_' + i.id,
+              imdbId: 'tmdb_' + i.id,
+              title: i.title || i.name,
+              year: (i.release_date || i.first_air_date || '').slice(0, 4),
+              director: '',
+              type: i.media_type === 'tv' ? 'tv' : 'movie',
+              poster: `https://image.tmdb.org/t/p/w500${i.poster_path}`,
+              rating: i.vote_average ? Math.round(i.vote_average * 10) / 10 : null,
+              overview: i.overview || ''
+            }));
+
+          if (items.length > 0) {
+            return {
+              text: `I searched global cinema records matching **"${rawQuery}"**. Here are the most prominent titles:`,
+              recommendations: items
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('General TMDB chat search failed:', e);
+      }
+
+      // Default curated recommendations
+      return {
+        text: `Here are **3 curated highlights** from your watchlist that deserve your immediate attention. Tap to explore details or track your viewing progress:`,
+        recommendations: this.titles.slice(0, 3)
+      };
     }
   }
 
