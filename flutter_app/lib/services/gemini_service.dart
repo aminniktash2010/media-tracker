@@ -5,7 +5,9 @@ import '../models/chat_message.dart';
 
 class GeminiService {
   // Can be configured to the Cloud Run service URL or mapped custom domain
+  // Cloud Run primary endpoint and custom domain endpoint
   static String cloudRunBaseUrl = 'https://media-tracker-ai-202076903469.us-central1.run.app';
+  static String customDomainUrl = 'https://tracker.niktash.ca';
 
   static Future<ChatMessage> sendMessage({
     required String message,
@@ -29,7 +31,7 @@ class GeminiService {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 25));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

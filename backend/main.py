@@ -161,6 +161,7 @@ User Question / Request:
     response_text = ""
     used_model = MODEL_NAME
     source = "vertex-ai"
+    recommendations: List[RecommendationItem] = []
 
     model = get_vertex_model()
     if model:
@@ -176,17 +177,33 @@ User Question / Request:
             response_text = resp.text
         except Exception as e:
             logger.error(f"Vertex AI generation failed: {e}")
-            response_text = f"I encountered an error querying Vertex AI: {str(e)}. Falling back to local curation engine."
-            source = "fallback"
+            dirs = ', '.join(directors_in_library[:2]) if directors_in_library else 'Denis Villeneuve and Christopher Nolan'
+            response_text = (
+                f"As your Cinema Curator, based on your active watchlist of {total_titles} titles ({len(unwatched_titles)} unwatched), "
+                f"I recommend exploring the catalog of {dirs}. Here are curated cinematic selections tailored to your taste:"
+            )
+            top_picks = [t for t in req.watchlist if not t.watched][:3]
+            for item in top_picks:
+                recommendations.append(RecommendationItem(
+                    id=f"rec_{abs(hash(item.title))}",
+                    title=item.title,
+                    year=item.year or "",
+                    director=item.director or "",
+                    type=item.type or "movie",
+                    overview=f"Featured watchlist highlight directed by {item.director or 'master filmmaker'}.",
+                    poster=None
+                ))
+            source = "local-curator-fallback"
     else:
-        # Fallback local intelligence if Vertex ADC is waiting for Cloud Run deploy
-        response_text = f"Hello! As your Cinema Curator, based on your backlog of {len(unwatched_titles)} unwatched titles, I recommend exploring films by {', '.join(directors_in_library[:3]) if directors_in_library else 'master filmmakers'}."
+        # Fallback local intelligence if Vertex is not initialized
+        dirs = ', '.join(directors_in_library[:2]) if directors_in_library else 'master filmmakers'
+        response_text = f"Hello! As your Cinema Curator, based on your backlog of {len(unwatched_titles)} unwatched titles, I recommend exploring films by {dirs}."
         source = "local-heuristic"
 
     # Extract JSON recommendations if embedded
-    recommendations: List[RecommendationItem] = []
     try:
         if "```json" in response_text:
+            json_recs: List[RecommendationItem] = []
             json_part = response_text.split("```json")[1].split("```")[0].strip()
             parsed = json.loads(json_part)
             if isinstance(parsed, list):
@@ -196,7 +213,7 @@ User Question / Request:
                     m_type = item.get("type", "movie")
                     poster = await fetch_tmdb_poster(title, year, m_type)
                     
-                    recommendations.append(RecommendationItem(
+                    json_recs.append(RecommendationItem(
                         id=f"rec_{abs(hash(title))}",
                         title=title,
                         year=year,
@@ -205,6 +222,8 @@ User Question / Request:
                         overview=item.get("overview", ""),
                         poster=poster
                     ))
+                if json_recs:
+                    recommendations = json_recs
             # Clean JSON codeblock out of display text
             response_text = response_text.split("```json")[0].strip()
     except Exception as e:
