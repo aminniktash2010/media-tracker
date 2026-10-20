@@ -31,18 +31,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Vertex AI
+# Lazy Vertex AI model reference
+vertex_model = None
 vertex_initialized = False
-try:
-    import vertexai
-    from vertexai.generative_models import GenerativeModel, GenerationConfig
-    vertexai.init(project=GCP_PROJECT, location=GCP_REGION)
-    vertex_model = GenerativeModel(MODEL_NAME)
-    vertex_initialized = True
-    logger.info(f"Initialized Vertex AI Gemini ({MODEL_NAME}) in {GCP_REGION} on project {GCP_PROJECT}")
-except Exception as e:
-    logger.warning(f"Could not initialize Vertex AI directly (fallback mode enabled): {e}")
-    vertex_model = None
+
+def get_vertex_model():
+    global vertex_model, vertex_initialized
+    if vertex_model is not None:
+        return vertex_model
+    try:
+        import vertexai
+        from vertexai.generative_models import GenerativeModel
+        vertexai.init(project=GCP_PROJECT, location=GCP_REGION)
+        vertex_model = GenerativeModel(MODEL_NAME)
+        vertex_initialized = True
+        logger.info(f"Initialized Vertex AI Gemini ({MODEL_NAME}) in {GCP_REGION}")
+        return vertex_model
+    except Exception as e:
+        logger.warning(f"Vertex AI initialization deferred/failed: {e}")
+        return None
 
 class MediaItemContext(BaseModel):
     title: str
@@ -128,7 +135,7 @@ async def fetch_tmdb_poster(title: str, year: Optional[str] = None, media_type: 
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_with_curator(req: ChatRequest):
-    if not req.message or not req.message.trim():
+    if not req.message or not req.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
     # Build context summary from user's active watchlist
@@ -155,15 +162,17 @@ User Question / Request:
     used_model = MODEL_NAME
     source = "vertex-ai"
 
-    if vertex_initialized and vertex_model:
+    model = get_vertex_model()
+    if model:
         try:
+            from vertexai.generative_models import GenerationConfig
             full_prompt = f"{SYSTEM_INSTRUCTION}\n\n{context_prompt}"
             generation_config = GenerationConfig(
                 temperature=0.7,
                 max_output_tokens=1024,
                 top_p=0.95,
             )
-            resp = vertex_model.generate_content(full_prompt, generation_config=generation_config)
+            resp = model.generate_content(full_prompt, generation_config=generation_config)
             response_text = resp.text
         except Exception as e:
             logger.error(f"Vertex AI generation failed: {e}")
