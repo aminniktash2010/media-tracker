@@ -107,7 +107,25 @@
           </div>
 
           <div class="controls-actions">
-            <select id="director-select" class="select-control director-select" title="Filter by Director">
+            <!-- Searchable Director Filter & Internet Importer Combobox -->
+            <div class="director-filter-combobox" id="director-filter-combobox">
+              <div class="director-combobox-input-wrapper">
+                <span class="director-combobox-icon" aria-hidden="true">🎬</span>
+                <input 
+                  type="text" 
+                  id="director-filter-input" 
+                  class="director-filter-input" 
+                  placeholder="Filter or Add Director…" 
+                  autocomplete="off"
+                  spellcheck="false"
+                >
+                <button type="button" id="director-filter-clear-btn" class="director-combobox-clear" style="display: none;" title="Clear director filter">✕</button>
+              </div>
+              <div id="director-filter-dropdown" class="director-filter-dropdown" style="display: none;"></div>
+            </div>
+
+            <!-- Legacy fallback select kept in DOM for backward compatibility -->
+            <select id="director-select" class="select-control director-select" title="Filter by Director" style="display: none;">
               <option value="">🎬 All Directors</option>
             </select>
 
@@ -140,10 +158,17 @@
 
         <!-- Active Director Filter Banner -->
         <div id="active-director-banner" class="active-director-banner" style="display: none;">
-          <span class="active-director-text">
-            <span>🎬</span> Filtering by Director: <strong id="active-director-name"></strong>
-          </span>
-          <button id="clear-director-filter" class="btn-clear-tag" title="Clear director filter">✕ Show All Directors</button>
+          <div class="active-director-left">
+            <span class="active-director-text">
+              <span>🎬</span> Filtering by Director: <strong id="active-director-name"></strong>
+            </span>
+          </div>
+          <div class="active-director-actions">
+            <button type="button" id="btn-sync-director-banner" class="btn btn-sm btn-sync-director" title="Search internet to find and add all works by this director">
+              <span>🌐</span> Add All Works from Internet
+            </button>
+            <button type="button" id="clear-director-filter" class="btn-clear-tag" title="Clear director filter">✕ Show All Directors</button>
+          </div>
         </div>
       </div>
     </div>
@@ -300,6 +325,7 @@
           <div class="detail-actions">
             <button id="detail-toggle-watched" class="btn btn-primary"></button>
             <button id="detail-filter-director" class="btn btn-ghost" style="display: none;"><span>🎬</span> Filter by this Director</button>
+            <button id="detail-sync-director" class="btn btn-ghost" style="display: none;"><span>🌐</span> Add All Works from Internet</button>
             <button id="detail-edit-btn" class="btn btn-ghost">Edit Item</button>
             <button id="detail-copy-imdb" class="btn btn-ghost">Copy IMDb ID</button>
             <a id="detail-visit-imdb" class="btn btn-ghost" href="#" target="_self">Visit IMDb (Same Tab)</a>

@@ -122,8 +122,13 @@
         searchClearBtn: document.getElementById('search-clear-btn'),
         sortSelect: document.getElementById('sort-select'),
         directorSelect: document.getElementById('director-select'),
+        directorFilterCombobox: document.getElementById('director-filter-combobox'),
+        directorFilterInput: document.getElementById('director-filter-input'),
+        directorFilterClearBtn: document.getElementById('director-filter-clear-btn'),
+        directorFilterDropdown: document.getElementById('director-filter-dropdown'),
         activeDirectorBanner: document.getElementById('active-director-banner'),
         activeDirectorName: document.getElementById('active-director-name'),
+        btnSyncDirectorBanner: document.getElementById('btn-sync-director-banner'),
         clearDirectorFilter: document.getElementById('clear-director-filter'),
         statTotal: document.getElementById('stat-total'),
         statWatched: document.getElementById('stat-watched'),
@@ -165,6 +170,7 @@
         detailOverview: document.getElementById('detail-overview'),
         detailToggleWatched: document.getElementById('detail-toggle-watched'),
         detailFilterDirector: document.getElementById('detail-filter-director'),
+        detailSyncDirector: document.getElementById('detail-sync-director'),
         detailEditBtn: document.getElementById('detail-edit-btn'),
         detailCopyImdb: document.getElementById('detail-copy-imdb'),
         detailVisitImdb: document.getElementById('detail-visit-imdb'),
@@ -225,10 +231,35 @@
         this.render();
       });
 
-      // Director select dropdown
+      // Director select dropdown & search combobox
       if (this.dom.directorSelect) {
         this.dom.directorSelect.addEventListener('change', (e) => {
           this.setDirectorFilter(e.target.value);
+        });
+      }
+
+      if (this.dom.directorFilterInput) {
+        this.dom.directorFilterInput.addEventListener('input', (e) => {
+          this.renderDirectorFilterDropdown(e.target.value);
+        });
+        this.dom.directorFilterInput.addEventListener('focus', (e) => {
+          this.renderDirectorFilterDropdown(e.target.value);
+        });
+      }
+
+      if (this.dom.directorFilterClearBtn) {
+        this.dom.directorFilterClearBtn.addEventListener('click', () => {
+          this.setDirectorFilter('');
+          this.closeDirectorFilterDropdown();
+        });
+      }
+
+      // Sync director banner button (Add all works from Internet)
+      if (this.dom.btnSyncDirectorBanner) {
+        this.dom.btnSyncDirectorBanner.addEventListener('click', () => {
+          if (this.activeDirector) {
+            this.openDirectorModal(this.activeDirector);
+          }
         });
       }
 
@@ -288,6 +319,16 @@
             const dir = this.activeDetailItem.director;
             this.closeDetailModal();
             this.setDirectorFilter(dir);
+          }
+        });
+      }
+
+      if (this.dom.detailSyncDirector) {
+        this.dom.detailSyncDirector.addEventListener('click', () => {
+          if (this.activeDetailItem && this.activeDetailItem.director) {
+            const dir = this.activeDetailItem.director;
+            this.closeDetailModal();
+            this.openDirectorModal(dir);
           }
         });
       }
@@ -358,6 +399,9 @@
 
       // Close autocomplete dropdowns when clicking outside
       document.addEventListener('click', (e) => {
+        if (!e.target.closest('.director-filter-combobox')) {
+          this.closeDirectorFilterDropdown();
+        }
         if (!e.target.closest('.form-group-autocomplete') && !e.target.closest('.director-search-container')) {
           this.closeAllAutocompletes();
         }
@@ -378,6 +422,7 @@
       // Universal Keyboard Navigation (Escape closes any open modal)
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          this.closeDirectorFilterDropdown();
           this.closeAllAutocompletes();
           if (this.dom.directorModalBackdrop && this.dom.directorModalBackdrop.classList.contains('open')) {
             this.closeDirectorModal();
@@ -540,9 +585,14 @@
             this.dom.detailFilterDirector.style.display = 'inline-flex';
             this.dom.detailFilterDirector.innerHTML = `<span>🎬</span> Filter by ${item.director}`;
           }
+          if (this.dom.detailSyncDirector) {
+            this.dom.detailSyncDirector.style.display = 'inline-flex';
+            this.dom.detailSyncDirector.innerHTML = `<span>🌐</span> Add All Works by ${item.director}`;
+          }
         } else {
           this.dom.detailDirectorBox.style.display = 'none';
           if (this.dom.detailFilterDirector) this.dom.detailFilterDirector.style.display = 'none';
+          if (this.dom.detailSyncDirector) this.dom.detailSyncDirector.style.display = 'none';
         }
       }
 
@@ -720,10 +770,7 @@
       return list;
     }
 
-    renderDirectorSelect() {
-      if (!this.dom.directorSelect) return;
-
-      // Extract unique directors and counts
+    getDirectorCounts() {
       const directorCounts = new Map();
       this.titles.forEach((item) => {
         if (item.director) {
@@ -733,36 +780,187 @@
           });
         }
       });
+      return Array.from(directorCounts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    }
 
-      const sortedDirectors = Array.from(directorCounts.entries()).sort((a, b) =>
-        a[0].localeCompare(b[0])
-      );
-
+    renderDirectorSelect() {
+      const sortedDirectors = this.getDirectorCounts();
       const currentVal = this.activeDirector;
 
-      this.dom.directorSelect.innerHTML = '';
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = '';
-      defaultOpt.textContent = `🎬 All Directors (${sortedDirectors.length})`;
-      this.dom.directorSelect.appendChild(defaultOpt);
+      if (this.dom.directorSelect) {
+        this.dom.directorSelect.innerHTML = '';
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = `🎬 All Directors (${sortedDirectors.length})`;
+        this.dom.directorSelect.appendChild(defaultOpt);
 
-      sortedDirectors.forEach(([dir, count]) => {
-        const opt = document.createElement('option');
-        opt.value = dir;
-        opt.textContent = `${dir} (${count})`;
-        if (dir.toLowerCase() === currentVal.toLowerCase()) {
-          opt.selected = true;
+        sortedDirectors.forEach(([dir, count]) => {
+          const opt = document.createElement('option');
+          opt.value = dir;
+          opt.textContent = `${dir} (${count})`;
+          if (dir.toLowerCase() === currentVal.toLowerCase()) {
+            opt.selected = true;
+          }
+          this.dom.directorSelect.appendChild(opt);
+        });
+
+        this.dom.directorSelect.value = currentVal;
+      }
+
+      if (this.dom.directorFilterInput) {
+        if (currentVal) {
+          this.dom.directorFilterInput.value = currentVal;
+        } else {
+          this.dom.directorFilterInput.placeholder = `🎬 Filter or Add Director (${sortedDirectors.length})…`;
         }
-        this.dom.directorSelect.appendChild(opt);
-      });
+      }
+      if (this.dom.directorFilterClearBtn) {
+        this.dom.directorFilterClearBtn.style.display = currentVal ? 'grid' : 'none';
+      }
+    }
 
-      this.dom.directorSelect.value = currentVal;
+    renderDirectorFilterDropdown(query = '') {
+      if (!this.dom.directorFilterDropdown) return;
+      const q = (query || '').trim().toLowerCase();
+      const allDirectors = this.getDirectorCounts();
+
+      this.dom.directorFilterDropdown.innerHTML = '';
+
+      // If query is empty, show "All Directors (Reset Filter)"
+      if (!q) {
+        const allItem = document.createElement('div');
+        allItem.className = `director-dropdown-item ${!this.activeDirector ? 'active' : ''}`;
+        allItem.innerHTML = `
+          <div class="director-item-info">
+            <span class="director-item-name">🎬 All Directors</span>
+          </div>
+          <span class="director-item-count">${allDirectors.length}</span>
+        `;
+        allItem.addEventListener('click', () => {
+          this.setDirectorFilter('');
+          this.closeDirectorFilterDropdown();
+        });
+        this.dom.directorFilterDropdown.appendChild(allItem);
+      }
+
+      // Filter matching directors in library
+      const matched = q 
+        ? allDirectors.filter(([dir]) => dir.toLowerCase().includes(q))
+        : allDirectors;
+
+      if (matched.length > 0) {
+        const header = document.createElement('div');
+        header.className = 'director-dropdown-header';
+        header.textContent = q ? `Directors in Library (${matched.length})` : 'Directors in Your Library';
+        this.dom.directorFilterDropdown.appendChild(header);
+
+        matched.slice(0, 16).forEach(([dir, count]) => {
+          const item = document.createElement('div');
+          const isActive = this.activeDirector.toLowerCase() === dir.toLowerCase();
+          item.className = `director-dropdown-item ${isActive ? 'active' : ''}`;
+          
+          item.innerHTML = `
+            <div class="director-item-info">
+              <span class="director-item-name">${dir}</span>
+              <span class="director-item-count">${count}</span>
+            </div>
+            <button type="button" class="director-item-sync-btn" title="Search internet to update & add all works by ${dir}">
+              <span>🌐</span> Add all works
+            </button>
+          `;
+
+          // Clicking row filters by that director
+          item.addEventListener('click', (e) => {
+            if (e.target.closest('.director-item-sync-btn')) return;
+            this.setDirectorFilter(dir);
+            this.closeDirectorFilterDropdown();
+          });
+
+          // Clicking sync button opens filmography importer
+          const syncBtn = item.querySelector('.director-item-sync-btn');
+          if (syncBtn) {
+            syncBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.closeDirectorFilterDropdown();
+              this.openDirectorModal(dir);
+            });
+          }
+
+          this.dom.directorFilterDropdown.appendChild(item);
+        });
+      }
+
+      // If user typed a search query:
+      if (q) {
+        // If no directors in library matched
+        if (matched.length === 0) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'director-dropdown-empty';
+          emptyDiv.innerHTML = `
+            <div class="director-empty-msg">No director named <strong>"${query}"</strong> found in your current library.</div>
+            <button type="button" class="btn btn-primary btn-add-director-now">
+              <span>➕</span> Add "${query}" & Import Works from Internet
+            </button>
+          `;
+          emptyDiv.querySelector('.btn-add-director-now').addEventListener('click', () => {
+            this.closeDirectorFilterDropdown();
+            this.openDirectorModal(query.trim());
+          });
+          this.dom.directorFilterDropdown.appendChild(emptyDiv);
+        } else {
+          // If some matched, also provide the option to search the internet for full works
+          const internetAction = document.createElement('div');
+          internetAction.className = 'director-dropdown-internet-action';
+          internetAction.innerHTML = `
+            <div class="director-internet-text">
+              <span class="director-internet-title">🌐 Search Internet for "${query.trim()}"</span>
+              <span class="director-internet-sub">Fetch complete filmography from TMDB & import works</span>
+            </div>
+            <span class="director-internet-badge">Add All Works →</span>
+          `;
+          internetAction.addEventListener('click', () => {
+            this.closeDirectorFilterDropdown();
+            this.openDirectorModal(query.trim());
+          });
+          this.dom.directorFilterDropdown.appendChild(internetAction);
+        }
+      } else {
+        // Empty query: Show "Import a New Director from Internet" at the bottom
+        const addDirectorItem = document.createElement('div');
+        addDirectorItem.className = 'director-dropdown-internet-action';
+        addDirectorItem.innerHTML = `
+          <div class="director-internet-text">
+            <span class="director-internet-title">➕ Import New Director Filmography</span>
+            <span class="director-internet-sub">Search internet by filmmaker name to add all their works</span>
+          </div>
+          <span class="director-internet-badge">Search Internet →</span>
+        `;
+        addDirectorItem.addEventListener('click', () => {
+          this.closeDirectorFilterDropdown();
+          this.openDirectorModal('');
+        });
+        this.dom.directorFilterDropdown.appendChild(addDirectorItem);
+      }
+
+      this.dom.directorFilterDropdown.style.display = 'block';
+    }
+
+    closeDirectorFilterDropdown() {
+      if (this.dom.directorFilterDropdown) {
+        this.dom.directorFilterDropdown.style.display = 'none';
+      }
     }
 
     setDirectorFilter(directorName) {
       this.activeDirector = (directorName || '').trim();
       if (this.dom.directorSelect) {
         this.dom.directorSelect.value = this.activeDirector;
+      }
+      if (this.dom.directorFilterInput) {
+        this.dom.directorFilterInput.value = this.activeDirector;
+      }
+      if (this.dom.directorFilterClearBtn) {
+        this.dom.directorFilterClearBtn.style.display = this.activeDirector ? 'grid' : 'none';
       }
 
       if (this.activeDirector) {
@@ -780,17 +978,27 @@
       this.render();
     }
 
-    openDirectorModal() {
-      this.dom.directorSearchInput.value = '';
-      this.dom.directorLoadingState.style.display = 'none';
-      this.dom.directorPersonResults.style.display = 'none';
-      this.dom.directorFilmographyView.style.display = 'none';
-      this.dom.directorModalBackdrop.classList.add('open');
-      setTimeout(() => this.dom.directorSearchInput.focus(), 100);
+    openDirectorModal(initialQuery = '') {
+      const q = (initialQuery || '').trim();
+      if (this.dom.directorSearchInput) {
+        this.dom.directorSearchInput.value = q;
+      }
+      if (this.dom.directorLoadingState) this.dom.directorLoadingState.style.display = 'none';
+      if (this.dom.directorPersonResults) this.dom.directorPersonResults.style.display = 'none';
+      if (this.dom.directorFilmographyView) this.dom.directorFilmographyView.style.display = 'none';
+      if (this.dom.directorModalBackdrop) this.dom.directorModalBackdrop.classList.add('open');
+
+      if (q) {
+        this.searchDirector(q);
+      } else if (this.dom.directorSearchInput) {
+        setTimeout(() => this.dom.directorSearchInput.focus(), 100);
+      }
     }
 
     closeDirectorModal() {
-      this.dom.directorModalBackdrop.classList.remove('open');
+      if (this.dom.directorModalBackdrop) {
+        this.dom.directorModalBackdrop.classList.remove('open');
+      }
       this.pendingDirectorCredits = [];
       this.pendingDirectorPerson = null;
     }
@@ -2038,8 +2246,10 @@
 
   // Initialize on DOM ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new WatchlistApp());
+    document.addEventListener('DOMContentLoaded', () => {
+      window.watchlistApp = new WatchlistApp();
+    });
   } else {
-    new WatchlistApp();
+    window.watchlistApp = new WatchlistApp();
   }
 })();
