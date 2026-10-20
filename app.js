@@ -2097,6 +2097,43 @@
     }
 
     async processAiCuratorQuery(rawQuery) {
+      // 0. Primary: Call Google Cloud Run Vertex AI Gemini endpoint
+      try {
+        const cloudRunApi = window.MEDIA_TRACKER_API_URL || 'https://media-tracker-ai-202076903469.us-central1.run.app';
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+        const response = await fetch(`${cloudRunApi}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: rawQuery,
+            watchlist: this.titles.slice(0, 60).map((t) => ({
+              title: t.title,
+              year: t.year,
+              director: t.director,
+              type: t.type,
+              rating: t.rating,
+              watched: t.watched
+            }))
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.text) {
+            return {
+              text: data.text,
+              recommendations: data.recommendations || []
+            };
+          }
+        }
+      } catch (err) {
+        console.info('Cloud Run Vertex AI endpoint unreachable, using client curation engine:', err);
+      }
+
       const q = rawQuery.toLowerCase();
       const unwatched = this.titles.filter((t) => !t.watched);
 
