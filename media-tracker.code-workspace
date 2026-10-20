@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "name": "Media Tracker (Web App)",
+      "path": "."
+    },
+    {
+      "name": "Backend (Cloud Run)",
+      "path": "backend"
+    },
+    {
+      "name": "Flutter App",
+      "path": "flutter_app"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true
+    },
+    "editor.formatOnSave": true
+  }
+}
