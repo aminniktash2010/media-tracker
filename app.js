@@ -16,10 +16,15 @@
 
   const STORAGE_KEY_V6 = 'amin_watchlist_clean_v6';
   const STORAGE_KEY_V5 = 'amin_watchlist_clean_v5';
+  const CHAT_STORAGE_KEY = 'amin_chat_history_v1';
+
+  const PLACEHOLDER_POSTER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='92' height='138' viewBox='0 0 92 138'%3E%3Crect width='92' height='138' fill='%2312121b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='24'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E";
+  const PLACEHOLDER_AVATAR_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='40' fill='%23181824'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-size='28'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E";
 
   class WatchlistApp {
     constructor() {
       this.titles = this.loadInitialData();
+      this.chatHistory = this.loadChatHistory();
       this.activeFilter = 'all';
       this.activeDirector = '';
       this.searchQuery = '';
@@ -35,6 +40,7 @@
 
       this.cacheDOM();
       this.bindEvents();
+      this.restoreChatMessages();
       this.render();
     }
 
@@ -48,6 +54,7 @@
       // Create lookup map for default enriched items
       const defaultMap = new Map();
       defaultData.forEach((d) => {
+        if (d.id) defaultMap.set('id:' + String(d.id), d);
         if (d.imdbId) defaultMap.set(d.imdbId.toLowerCase(), d);
         if (d.title) defaultMap.set(d.title.toLowerCase(), d);
       });
@@ -57,18 +64,21 @@
         if (savedV6) {
           const parsed = JSON.parse(savedV6);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Merge enriched metadata (posters, ratings, synopses, directors) into saved items
+            // Merge enriched canonical metadata (posters, ratings, synopses, directors) into saved items
             return parsed.map((item) => {
-              const match = defaultMap.get((item.imdbId || '').toLowerCase()) ||
-                            defaultMap.get((item.title || '').toLowerCase());
+              const match = defaultMap.get('id:' + String(item.id)) ||
+                            defaultMap.get((item.title || '').toLowerCase()) ||
+                            defaultMap.get((item.imdbId || '').toLowerCase());
               if (match) {
                 return {
                   ...match,
                   ...item,
-                  poster: item.poster || match.poster,
-                  rating: item.rating || match.rating,
-                  overview: item.overview || match.overview,
-                  director: item.director || match.director || ''
+                  imdbId: match.imdbId || item.imdbId,
+                  year: match.year || item.year,
+                  poster: match.poster || item.poster,
+                  rating: match.rating || item.rating,
+                  overview: match.overview || item.overview,
+                  director: match.director || item.director || ''
                 };
               }
               return item;
@@ -126,6 +136,10 @@
         directorFilterInput: document.getElementById('director-filter-input'),
         directorFilterClearBtn: document.getElementById('director-filter-clear-btn'),
         directorFilterDropdown: document.getElementById('director-filter-dropdown'),
+        inlineDirectorChip: document.getElementById('inline-director-chip'),
+        inlineDirectorChipName: document.getElementById('inline-director-chip-name'),
+        btnToggleDirectors: document.getElementById('btn-toggle-directors'),
+        directorsTriggerLabel: document.getElementById('directors-trigger-label'),
         activeDirectorBanner: document.getElementById('active-director-banner'),
         activeDirectorName: document.getElementById('active-director-name'),
         btnSyncDirectorBanner: document.getElementById('btn-sync-director-banner'),
@@ -139,6 +153,8 @@
         addBtn: document.getElementById('add-btn'),
         addBtnMobile: document.getElementById('add-btn-mobile'),
         btnAddDirector: document.getElementById('btn-add-director'),
+        btnJumpAi: document.getElementById('btn-jump-ai'),
+        fabAiCurator: document.getElementById('fab-ai-curator'),
         
         // Add/Edit Modal
         modalBackdrop: document.getElementById('modal-backdrop'),
@@ -199,12 +215,19 @@
         importBtnLabel: document.getElementById('import-btn-label'),
 
         // AI Cinema Curator Elements
+        aiChatDrawer: document.getElementById('ai-chat-drawer'),
+        btnCloseChatDrawer: document.getElementById('btn-close-chat-drawer'),
+        btnToggleChat: document.getElementById('btn-toggle-chat'),
+        toggleChatLabel: document.getElementById('toggle-chat-label'),
+        aiQuickForm: document.getElementById('ai-quick-form'),
+        aiQuickInput: document.getElementById('ai-quick-input'),
         aiChatHistory: document.getElementById('ai-chat-history'),
         chatTypingIndicator: document.getElementById('chat-typing-indicator'),
         aiChatForm: document.getElementById('ai-chat-form'),
         aiChatInput: document.getElementById('ai-chat-input'),
         btnChatSend: document.getElementById('btn-chat-send'),
         btnClearChat: document.getElementById('btn-clear-chat'),
+        drawerPromptsContainer: document.getElementById('drawer-prompts-chips'),
 
         btnExportCsv: document.getElementById('btn-export-csv'),
         btnExportJson: document.getElementById('btn-export-json'),
@@ -216,20 +239,49 @@
     }
 
     bindEvents() {
-      // Search with live update and clear button
+      // Unified Search & Director Filter with live update and smart dropdown
       this.dom.searchInput.addEventListener('input', (e) => {
-        this.searchQuery = e.target.value.trim().toLowerCase();
-        this.dom.searchClearBtn.style.display = this.searchQuery ? 'grid' : 'none';
+        const rawVal = e.target.value;
+        this.searchQuery = rawVal.trim().toLowerCase();
+        this.dom.searchClearBtn.style.display = (this.searchQuery || this.activeDirector) ? 'grid' : 'none';
         this.render();
+        if (this.searchQuery.length >= 1) {
+          this.renderDirectorFilterDropdown(rawVal);
+        } else {
+          this.closeDirectorFilterDropdown();
+        }
       });
 
       this.dom.searchClearBtn.addEventListener('click', () => {
         this.dom.searchInput.value = '';
         this.searchQuery = '';
+        if (this.activeDirector) {
+          this.setDirectorFilter('');
+        }
         this.dom.searchClearBtn.style.display = 'none';
+        this.closeDirectorFilterDropdown();
         this.dom.searchInput.focus();
         this.render();
       });
+
+      if (this.dom.inlineDirectorChip) {
+        this.dom.inlineDirectorChip.addEventListener('click', () => {
+          this.setDirectorFilter('');
+          this.closeDirectorFilterDropdown();
+        });
+      }
+
+      if (this.dom.btnToggleDirectors) {
+        this.dom.btnToggleDirectors.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = this.dom.directorFilterDropdown && this.dom.directorFilterDropdown.style.display === 'block';
+          if (isOpen) {
+            this.closeDirectorFilterDropdown();
+          } else {
+            this.renderDirectorFilterDropdown(this.dom.searchInput.value);
+          }
+        });
+      }
 
       // Director select dropdown & search combobox
       if (this.dom.directorSelect) {
@@ -285,6 +337,40 @@
       // Add Director Button
       if (this.dom.btnAddDirector) {
         this.dom.btnAddDirector.addEventListener('click', () => this.openDirectorModal());
+      }
+
+      // Quick Jump / Open AI Curator Slide-Over Panel
+      const openAiDrawer = () => {
+        this.setChatDrawerOpen(true);
+      };
+      if (this.dom.btnJumpAi) this.dom.btnJumpAi.addEventListener('click', openAiDrawer);
+      if (this.dom.fabAiCurator) this.dom.fabAiCurator.addEventListener('click', openAiDrawer);
+      if (this.dom.btnToggleChat) {
+        this.dom.btnToggleChat.addEventListener('click', () => {
+          const isOpen = this.dom.aiChatDrawer && this.dom.aiChatDrawer.classList.contains('open');
+          this.setChatDrawerOpen(!isOpen);
+        });
+      }
+      if (this.dom.btnCloseChatDrawer) {
+        this.dom.btnCloseChatDrawer.addEventListener('click', () => this.setChatDrawerOpen(false));
+      }
+      if (this.dom.aiChatDrawer) {
+        this.dom.aiChatDrawer.addEventListener('click', (e) => {
+          if (e.target === this.dom.aiChatDrawer) {
+            this.setChatDrawerOpen(false);
+          }
+        });
+      }
+      if (this.dom.aiQuickForm) {
+        this.dom.aiQuickForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const val = (this.dom.aiQuickInput ? this.dom.aiQuickInput.value : '').trim();
+          if (this.dom.aiQuickInput) this.dom.aiQuickInput.value = '';
+          this.setChatDrawerOpen(true);
+          if (val) {
+            this.sendChatMessage(val);
+          }
+        });
       }
 
       // Add/Edit Modal Events
@@ -419,7 +505,7 @@
         this.dom.btnClearChat.addEventListener('click', () => this.clearChat());
       }
 
-      // Universal Keyboard Navigation (Escape closes any open modal)
+      // Universal Keyboard Navigation (Escape closes any open modal or chat drawer)
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           this.closeDirectorFilterDropdown();
@@ -430,6 +516,8 @@
             this.closeDetailModal();
           } else if (this.dom.modalBackdrop.classList.contains('open')) {
             this.closeModal();
+          } else if (this.dom.aiChatDrawer && this.dom.aiChatDrawer.classList.contains('open')) {
+            this.setChatDrawerOpen(false);
           }
         }
       });
@@ -457,20 +545,20 @@
 
     renderPrompts() {
       const prompts = window.QUICK_PROMPTS || [];
-      this.dom.promptsContainer.innerHTML = '';
-      prompts.forEach((prompt) => {
-        const btn = document.createElement('button');
-        btn.className = 'chip-btn';
-        btn.type = 'button';
-        btn.textContent = prompt;
-        btn.addEventListener('click', () => {
-          this.sendChatMessage(prompt);
-          const aiSection = document.getElementById('ai-curator-section');
-          if (aiSection) {
-            aiSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
+      const containers = [this.dom.promptsContainer, this.dom.drawerPromptsContainer].filter(Boolean);
+      containers.forEach((container) => {
+        container.innerHTML = '';
+        prompts.forEach((prompt) => {
+          const btn = document.createElement('button');
+          btn.className = 'chip-btn';
+          btn.type = 'button';
+          btn.textContent = prompt;
+          btn.addEventListener('click', () => {
+            this.setChatDrawerOpen(true);
+            this.sendChatMessage(prompt);
+          });
+          container.appendChild(btn);
         });
-        this.dom.promptsContainer.appendChild(btn);
       });
     }
 
@@ -754,7 +842,11 @@
       }
 
       // Sorting
-      if (this.sortBy === 'title-asc') {
+      if (this.sortBy === 'rating-desc') {
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0) || a.title.localeCompare(b.title));
+      } else if (this.sortBy === 'rating-asc') {
+        list.sort((a, b) => (a.rating || 99) - (b.rating || 99) || a.title.localeCompare(b.title));
+      } else if (this.sortBy === 'title-asc') {
         list.sort((a, b) => a.title.localeCompare(b.title));
       } else if (this.sortBy === 'director-asc') {
         list.sort((a, b) => (a.director || 'zzz').localeCompare(b.director || 'zzz') || a.title.localeCompare(b.title));
@@ -810,12 +902,30 @@
       if (this.dom.directorFilterInput) {
         if (currentVal) {
           this.dom.directorFilterInput.value = currentVal;
-        } else {
-          this.dom.directorFilterInput.placeholder = `🎬 Filter or Add Director (${sortedDirectors.length})…`;
         }
       }
       if (this.dom.directorFilterClearBtn) {
         this.dom.directorFilterClearBtn.style.display = currentVal ? 'grid' : 'none';
+      }
+      if (this.dom.inlineDirectorChip && this.dom.inlineDirectorChipName) {
+        if (currentVal) {
+          this.dom.inlineDirectorChip.style.display = 'inline-flex';
+          this.dom.inlineDirectorChipName.textContent = currentVal;
+        } else {
+          this.dom.inlineDirectorChip.style.display = 'none';
+          this.dom.inlineDirectorChipName.textContent = '';
+        }
+      }
+      if (this.dom.directorsTriggerLabel) {
+        this.dom.directorsTriggerLabel.textContent = currentVal
+          ? `Director: ${currentVal}`
+          : `Directors (${sortedDirectors.length})`;
+      }
+      if (this.dom.btnToggleDirectors) {
+        this.dom.btnToggleDirectors.classList.toggle('active', Boolean(currentVal));
+      }
+      if (this.dom.searchClearBtn) {
+        this.dom.searchClearBtn.style.display = (this.searchQuery || currentVal) ? 'grid' : 'none';
       }
     }
 
@@ -832,9 +942,9 @@
         allItem.className = `director-dropdown-item ${!this.activeDirector ? 'active' : ''}`;
         allItem.innerHTML = `
           <div class="director-item-info">
-            <span class="director-item-name">🎬 All Directors</span>
+            <span class="director-item-name">🎬 All Directors (Show Entire Library)</span>
           </div>
-          <span class="director-item-count">${allDirectors.length}</span>
+          <span class="director-item-count">${allDirectors.length} directors</span>
         `;
         allItem.addEventListener('click', () => {
           this.setDirectorFilter('');
@@ -843,7 +953,7 @@
         this.dom.directorFilterDropdown.appendChild(allItem);
       }
 
-      // Filter matching directors in library
+      // 1. Filter matching directors in library
       const matched = q 
         ? allDirectors.filter(([dir]) => dir.toLowerCase().includes(q))
         : allDirectors;
@@ -851,20 +961,20 @@
       if (matched.length > 0) {
         const header = document.createElement('div');
         header.className = 'director-dropdown-header';
-        header.textContent = q ? `Directors in Library (${matched.length})` : 'Directors in Your Library';
+        header.textContent = q ? `🎬 Matching Directors in Library (${matched.length})` : '🎬 Filter by Director in Your Library';
         this.dom.directorFilterDropdown.appendChild(header);
 
-        matched.slice(0, 16).forEach(([dir, count]) => {
+        matched.slice(0, q ? 8 : 20).forEach(([dir, count]) => {
           const item = document.createElement('div');
           const isActive = this.activeDirector.toLowerCase() === dir.toLowerCase();
           item.className = `director-dropdown-item ${isActive ? 'active' : ''}`;
           
           item.innerHTML = `
             <div class="director-item-info">
-              <span class="director-item-name">${dir}</span>
-              <span class="director-item-count">${count}</span>
+              <span class="director-item-name">${this.escapeHtml(dir)}</span>
+              <span class="director-item-count">${count} title${count === 1 ? '' : 's'}</span>
             </div>
-            <button type="button" class="director-item-sync-btn" title="Search internet to update & add all works by ${dir}">
+            <button type="button" class="director-item-sync-btn" title="Search internet to update & add all works by ${this.escapeHtml(dir)}">
               <span>🌐</span> Add all works
             </button>
           `;
@@ -872,6 +982,8 @@
           // Clicking row filters by that director
           item.addEventListener('click', (e) => {
             if (e.target.closest('.director-item-sync-btn')) return;
+            this.dom.searchInput.value = '';
+            this.searchQuery = '';
             this.setDirectorFilter(dir);
             this.closeDirectorFilterDropdown();
           });
@@ -890,40 +1002,87 @@
         });
       }
 
-      // If user typed a search query:
+      // 2. If user typed a search query, also show matching Titles in Watchlist for instant jump!
       if (q) {
-        // If no directors in library matched
-        if (matched.length === 0) {
-          const emptyDiv = document.createElement('div');
-          emptyDiv.className = 'director-dropdown-empty';
-          emptyDiv.innerHTML = `
-            <div class="director-empty-msg">No director named <strong>"${query}"</strong> found in your current library.</div>
-            <button type="button" class="btn btn-primary btn-add-director-now">
-              <span>➕</span> Add "${query}" & Import Works from Internet
-            </button>
-          `;
-          emptyDiv.querySelector('.btn-add-director-now').addEventListener('click', () => {
-            this.closeDirectorFilterDropdown();
-            this.openDirectorModal(query.trim());
+        const matchingTitles = this.titles.filter((t) =>
+          t.title.toLowerCase().includes(q) ||
+          (t.year && t.year.toLowerCase().includes(q)) ||
+          (t.imdbId && t.imdbId.toLowerCase().includes(q))
+        ).slice(0, 4);
+
+        if (matchingTitles.length > 0) {
+          const titleHeader = document.createElement('div');
+          titleHeader.className = 'director-dropdown-header';
+          titleHeader.textContent = `🎞️ Matching Titles in Watchlist (Click for Details)`;
+          this.dom.directorFilterDropdown.appendChild(titleHeader);
+
+          matchingTitles.forEach((t) => {
+            const row = document.createElement('div');
+            row.className = 'omni-title-item';
+            const posterSrc = t.poster || PLACEHOLDER_POSTER_SVG;
+            row.innerHTML = `
+              <div class="omni-title-left">
+                <img class="omni-title-poster" src="${posterSrc}" alt="${this.escapeHtml(t.title)}">
+                <div class="omni-title-meta">
+                  <span class="omni-title-name">${this.escapeHtml(t.title)}</span>
+                  <div class="omni-title-sub">
+                    <span>${this.escapeHtml(t.year)}</span>
+                    ${t.director ? `<span>•</span><span>dir. ${this.escapeHtml(t.director)}</span>` : ''}
+                    ${t.rating ? `<span>•</span><span style="color:#fbbf24;">★ ${t.rating}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+              <span class="badge badge-type" style="font-size:0.65rem;">Details →</span>
+            `;
+            const imgEl = row.querySelector('.omni-title-poster');
+            if (imgEl) {
+              imgEl.addEventListener('error', () => { imgEl.src = PLACEHOLDER_POSTER_SVG; });
+            }
+            row.addEventListener('click', () => {
+              this.closeDirectorFilterDropdown();
+              this.openDetailModal(t);
+            });
+            this.dom.directorFilterDropdown.appendChild(row);
           });
-          this.dom.directorFilterDropdown.appendChild(emptyDiv);
-        } else {
-          // If some matched, also provide the option to search the internet for full works
-          const internetAction = document.createElement('div');
-          internetAction.className = 'director-dropdown-internet-action';
-          internetAction.innerHTML = `
-            <div class="director-internet-text">
-              <span class="director-internet-title">🌐 Search Internet for "${query.trim()}"</span>
-              <span class="director-internet-sub">Fetch complete filmography from TMDB & import works</span>
-            </div>
-            <span class="director-internet-badge">Add All Works →</span>
-          `;
-          internetAction.addEventListener('click', () => {
-            this.closeDirectorFilterDropdown();
-            this.openDirectorModal(query.trim());
-          });
-          this.dom.directorFilterDropdown.appendChild(internetAction);
         }
+
+        // 3. Internet discovery actions for Director filmography or adding a new Title
+        const safeQ = this.escapeHtml(query.trim());
+        const internetDirectorAction = document.createElement('div');
+        internetDirectorAction.className = 'director-dropdown-internet-action';
+        internetDirectorAction.innerHTML = `
+          <div class="director-internet-text">
+            <span class="director-internet-title">🌐 Search TMDB for Director "${safeQ}"</span>
+            <span class="director-internet-sub">Fetch complete directed filmography & import works</span>
+          </div>
+          <span class="director-internet-badge">Import Filmography →</span>
+        `;
+        internetDirectorAction.addEventListener('click', () => {
+          this.closeDirectorFilterDropdown();
+          this.openDirectorModal(query.trim());
+        });
+        this.dom.directorFilterDropdown.appendChild(internetDirectorAction);
+
+        const internetTitleAction = document.createElement('div');
+        internetTitleAction.className = 'director-dropdown-internet-action';
+        internetTitleAction.style.borderTop = '1px solid rgba(255,255,255,0.08)';
+        internetTitleAction.innerHTML = `
+          <div class="director-internet-text">
+            <span class="director-internet-title">＋ Add Title "${safeQ}" to Watchlist</span>
+            <span class="director-internet-sub">Auto-fill poster, IMDb ID & director from TMDB</span>
+          </div>
+          <span class="director-internet-badge">Add Title →</span>
+        `;
+        internetTitleAction.addEventListener('click', () => {
+          const initialTitle = query.trim();
+          this.closeDirectorFilterDropdown();
+          this.openAddModal();
+          if (this.dom.inputTitle) {
+            this.dom.inputTitle.value = initialTitle;
+            this.handleTitleAutocomplete(initialTitle);
+          }
+        });
+        this.dom.directorFilterDropdown.appendChild(internetTitleAction);
       } else {
         // Empty query: Show "Import a New Director from Internet" at the bottom
         const addDirectorItem = document.createElement('div');
@@ -1048,7 +1207,7 @@
         card.className = 'director-person-card';
         const avatarUrl = person.profile_path 
           ? `https://image.tmdb.org/t/p/w185${person.profile_path}` 
-          : 'https://via.placeholder.com/100x100?text=Director';
+          : PLACEHOLDER_AVATAR_SVG;
         
         const knownTitles = (person.known_for || [])
           .map((k) => k.title || k.name)
@@ -1123,7 +1282,7 @@
       // Profile Header
       const avatarUrl = person.profile_path 
         ? `https://image.tmdb.org/t/p/w185${person.profile_path}` 
-        : 'https://via.placeholder.com/100x100?text=Director';
+        : PLACEHOLDER_AVATAR_SVG;
       this.dom.directorProfileAvatar.src = avatarUrl;
       this.dom.directorProfileName.textContent = person.name;
       this.dom.directorProfileStats.textContent = `${credits.length} directed titles available to import`;
@@ -1142,7 +1301,7 @@
         const year = (credit.release_date || credit.first_air_date || '').slice(0, 4) || '—';
         const posterUrl = credit.poster_path 
           ? `https://image.tmdb.org/t/p/w185${credit.poster_path}` 
-          : 'https://via.placeholder.com/92x138?text=No+Poster';
+          : PLACEHOLDER_POSTER_SVG;
         const rating = credit.vote_average ? (Math.round(credit.vote_average * 10) / 10).toFixed(1) : null;
         const isTv = credit.media_type === 'tv';
         const isAlreadyAdded = existingLookup.has(title.toLowerCase());
@@ -1733,7 +1892,7 @@
         const rating = item.vote_average ? (Math.round(item.vote_average * 10) / 10).toFixed(1) : null;
         const posterUrl = item.poster_path 
           ? `https://image.tmdb.org/t/p/w92${item.poster_path}`
-          : 'https://via.placeholder.com/34x50?text=No+Poster';
+          : PLACEHOLDER_POSTER_SVG;
 
         const row = document.createElement('div');
         row.className = 'autocomplete-item';
@@ -1869,7 +2028,7 @@
       results.forEach((person) => {
         const avatarUrl = person.profile_path
           ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
-          : 'https://via.placeholder.com/38x38?text=Dir';
+          : PLACEHOLDER_AVATAR_SVG;
         
         const knownTitles = (person.known_for || [])
           .map((k) => k.title || k.name)
@@ -1913,6 +2072,53 @@
        AI Cinema Curator Engine & Interactive Chat
        ========================================================================== */
 
+    loadChatHistory() {
+      try {
+        const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) return parsed.slice(-16);
+        }
+      } catch (e) {
+        console.warn('Could not load chat history:', e);
+      }
+      return [];
+    }
+
+    saveChatHistory() {
+      try {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(this.chatHistory.slice(-16)));
+      } catch (e) {
+        console.warn('Could not save chat history:', e);
+      }
+    }
+
+    setChatDrawerOpen(open) {
+      if (!this.dom.aiChatDrawer) return;
+      this.dom.aiChatDrawer.classList.toggle('open', Boolean(open));
+      if (open) {
+        this.scrollChatToBottom();
+        setTimeout(() => {
+          if (this.dom.aiChatInput) this.dom.aiChatInput.focus();
+        }, 200);
+      }
+    }
+
+    restoreChatMessages() {
+      if (!this.chatHistory || this.chatHistory.length === 0) return;
+      this.chatHistory.forEach((entry) => {
+        this.appendChatMessage(entry.role, entry.content, entry.recommendations || [], false);
+      });
+    }
+
+    escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     handleChatSubmit() {
       const input = this.dom.aiChatInput;
       if (!input) return;
@@ -1924,11 +2130,20 @@
 
     clearChat() {
       if (!this.dom.aiChatHistory) return;
+      this.chatHistory = [];
+      try {
+        localStorage.removeItem(CHAT_STORAGE_KEY);
+      } catch (e) {
+        // ignore
+      }
       this.dom.aiChatHistory.innerHTML = `
         <div class="chat-message assistant-message">
           <div class="chat-avatar">✨</div>
-          <div class="chat-bubble">
-            <p>Chat cleared. I'm ready for your next movie or TV inquiry!</p>
+          <div class="chat-bubble-wrap">
+            <div class="chat-sender-label">AI Cinema Curator</div>
+            <div class="chat-bubble">
+              <p>Chat cleared. I'm ready for your next movie or TV inquiry!</p>
+            </div>
           </div>
         </div>
       `;
@@ -1939,8 +2154,11 @@
       if (this.isAiThinking) return;
       this.isAiThinking = true;
 
+      // Open slide-over conversation drawer when chatting
+      this.setChatDrawerOpen(true);
+
       // Append user bubble
-      this.appendChatMessage('user', userText);
+      this.appendChatMessage('user', userText, [], true);
 
       // Show typing indicator
       if (this.dom.chatTypingIndicator) {
@@ -1953,28 +2171,33 @@
         const responseData = await this.processAiCuratorQuery(userText);
         
         // Brief natural delay for realistic curator feeling
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise((resolve) => setTimeout(resolve, 450));
 
         if (this.dom.chatTypingIndicator) {
           this.dom.chatTypingIndicator.style.display = 'none';
         }
 
-        this.appendChatMessage('assistant', responseData.text, responseData.recommendations);
+        this.appendChatMessage('assistant', responseData.text, responseData.recommendations, true);
       } catch (err) {
         console.error('AI Curator error:', err);
         if (this.dom.chatTypingIndicator) {
           this.dom.chatTypingIndicator.style.display = 'none';
         }
-        this.appendChatMessage('assistant', "I'm having a brief issue accessing the film database, but you can explore our 125 curated titles directly using the category filters and director dropdown above!");
+        this.appendChatMessage('assistant', "I'm having a brief issue accessing the film database, but you can explore our 125 curated titles directly using the category filters and director dropdown above!", [], false);
       } finally {
         this.isAiThinking = false;
         this.scrollChatToBottom();
       }
     }
 
-    appendChatMessage(role, content, recommendations = []) {
+    appendChatMessage(role, content, recommendations = [], persist = true) {
       const container = this.dom.aiChatHistory;
       if (!container) return;
+
+      if (persist) {
+        this.chatHistory.push({ role, content, recommendations });
+        this.saveChatHistory();
+      }
 
       const messageEl = document.createElement('div');
       messageEl.className = `chat-message ${role === 'user' ? 'user-message' : 'assistant-message'}`;
@@ -1984,11 +2207,19 @@
       avatar.textContent = role === 'user' ? '👤' : '✨';
       messageEl.appendChild(avatar);
 
+      const bubbleWrap = document.createElement('div');
+      bubbleWrap.className = 'chat-bubble-wrap';
+
+      const senderLabel = document.createElement('div');
+      senderLabel.className = 'chat-sender-label';
+      senderLabel.textContent = role === 'user' ? 'You' : 'AI Cinema Curator';
+      bubbleWrap.appendChild(senderLabel);
+
       const bubble = document.createElement('div');
       bubble.className = 'chat-bubble';
 
-      // Convert line breaks and bold markdown
-      const formattedText = content
+      // Safely escape HTML first, then convert line breaks and bold/italic markdown
+      const formattedText = this.escapeHtml(content)
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -2005,42 +2236,52 @@
           const card = document.createElement('div');
           card.className = 'chat-rec-card';
 
-          const posterUrl = rec.poster || 'https://via.placeholder.com/44x64?text=Poster';
-          const isInWatchlist = this.titles.some(
-            (t) => (t.id === rec.id) || (t.title.toLowerCase() === rec.title.toLowerCase())
+          const existingMatch = this.titles.find(
+            (t) => (t.id === rec.id) || (t.title.toLowerCase() === (rec.title || '').toLowerCase())
           );
+          const posterUrl = rec.poster || (existingMatch && existingMatch.poster) || PLACEHOLDER_POSTER_SVG;
+          const isInWatchlist = Boolean(existingMatch);
+          const safeTitle = this.escapeHtml(rec.title);
+          const safeDirector = this.escapeHtml(rec.director || (existingMatch && existingMatch.director) || '');
+          const overviewText = this.escapeHtml(rec.overview || (existingMatch && existingMatch.overview) || '');
 
           card.innerHTML = `
-            <img class="chat-rec-poster" src="${posterUrl}" alt="${rec.title}">
+            <img class="chat-rec-poster" src="${posterUrl}" alt="${safeTitle}">
             <div class="chat-rec-info">
-              <div class="chat-rec-title" title="${rec.title}">${rec.title}</div>
+              <div class="chat-rec-title" title="${safeTitle}">${safeTitle}</div>
               <div class="chat-rec-meta">
-                <span>${rec.year}</span>
+                <span>${this.escapeHtml(rec.year || '—')}</span>
                 <span>&bull;</span>
-                <span>${rec.director ? 'dir. ' + rec.director : (rec.type === 'tv' ? 'TV Series' : 'Movie')}</span>
+                <span>${safeDirector ? 'dir. ' + safeDirector : (rec.type === 'tv' ? 'TV Series' : 'Movie')}</span>
                 ${rec.rating ? `<span>&bull;</span> <span style="color: #fbbf24;">★ ${rec.rating}</span>` : ''}
               </div>
+              ${overviewText ? `<div class="chat-rec-overview">${overviewText}</div>` : ''}
             </div>
           `;
+
+          const posterEl = card.querySelector('.chat-rec-poster');
+          if (posterEl) {
+            posterEl.addEventListener('error', () => {
+              posterEl.src = PLACEHOLDER_POSTER_SVG;
+            });
+          }
 
           const infoBox = card.querySelector('.chat-rec-info');
           const actionBtn = document.createElement('button');
           actionBtn.type = 'button';
           actionBtn.className = `chat-rec-btn ${isInWatchlist ? 'added' : ''}`;
-          actionBtn.innerHTML = isInWatchlist ? 'In Watchlist ✓' : '<span>＋</span> Add to Watchlist';
+          actionBtn.innerHTML = isInWatchlist ? 'In Watchlist • Details' : '<span>＋</span> Add to Watchlist';
 
-          if (!isInWatchlist) {
-            actionBtn.addEventListener('click', () => {
+          actionBtn.addEventListener('click', () => {
+            const match = this.titles.find(
+              (t) => (t.id === rec.id) || (t.title.toLowerCase() === (rec.title || '').toLowerCase())
+            );
+            if (match) {
+              this.openDetailModal(match);
+            } else {
               this.addRecommendationToWatchlist(rec, actionBtn);
-            });
-          } else {
-            actionBtn.addEventListener('click', () => {
-              const match = this.titles.find(
-                (t) => (t.id === rec.id) || (t.title.toLowerCase() === rec.title.toLowerCase())
-              );
-              if (match) this.openDetailModal(match);
-            });
-          }
+            }
+          });
 
           infoBox.appendChild(actionBtn);
           recsGrid.appendChild(card);
@@ -2049,7 +2290,8 @@
         bubble.appendChild(recsGrid);
       }
 
-      messageEl.appendChild(bubble);
+      bubbleWrap.appendChild(bubble);
+      messageEl.appendChild(bubbleWrap);
       container.appendChild(messageEl);
       this.scrollChatToBottom();
     }
@@ -2061,14 +2303,14 @@
     }
 
     addRecommendationToWatchlist(rec, btnElement) {
-      const exists = this.titles.some(
-        (t) => (t.id === rec.id) || (t.title.toLowerCase() === rec.title.toLowerCase())
+      const exists = this.titles.find(
+        (t) => (t.id === rec.id) || (t.title.toLowerCase() === (rec.title || '').toLowerCase())
       );
 
       if (exists) {
         btnElement.className = 'chat-rec-btn added';
-        btnElement.textContent = 'In Watchlist ✓';
-        this.showToast(`"${rec.title}" is already in your watchlist`);
+        btnElement.textContent = 'In Watchlist • Details';
+        this.openDetailModal(exists);
         return;
       }
 
@@ -2092,7 +2334,7 @@
       this.render();
 
       btnElement.className = 'chat-rec-btn added';
-      btnElement.textContent = 'Added ✓';
+      btnElement.textContent = 'Added ✓ • View Details';
       this.showToast(`Added "${rec.title}" to your watchlist! 🎬`);
     }
 
@@ -2108,6 +2350,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: rawQuery,
+            history: this.chatHistory.slice(-6).map((m) => ({
+              role: m.role,
+              content: m.content
+            })),
             watchlist: this.titles.slice(0, 60).map((t) => ({
               title: t.title,
               year: t.year,
@@ -2123,7 +2369,8 @@
 
         if (response.ok) {
           const data = await response.json();
-          if (data && data.text) {
+          // Use Cloud Run response when powered by live Vertex AI or smart query-aware backend
+          if (data && data.text && data.source !== 'local-curator-fallback' && data.source !== 'local-heuristic') {
             return {
               text: data.text,
               recommendations: data.recommendations || []
@@ -2137,15 +2384,20 @@
       const q = rawQuery.toLowerCase();
       const unwatched = this.titles.filter((t) => !t.watched);
 
-      // 1. Check for Director specific queries
-      const directors = [
+      // 1. Check for Director specific queries (both library directors and famous auteurs)
+      const famousDirectors = [
         'nolan', 'villeneuve', 'lynch', 'wong kar-wai', 'wong kar wai',
         'park chan-wook', 'park chan wook', 'tarantino', 'scorsese',
         'kubrick', 'miyazaki', 'fincher', 'lanthimos', 'guadagnino',
-        'coen', 'bong joon-ho', 'bong joon ho', 'waititi'
+        'coen', 'bong joon-ho', 'bong joon ho', 'waititi', 'garland',
+        'kiarostami', 'sautet', 'bresson', 'bunuel', 'buñuel', 'sciamma',
+        'linklater', 'chazelle', 'almodovar', 'wes anderson', 'paul thomas anderson'
       ];
 
-      const matchedDirectorKey = directors.find((d) => q.includes(d));
+      const libraryDirectors = this.getDirectorCounts().map(([dir]) => dir.toLowerCase());
+      const matchedDirectorKey =
+        libraryDirectors.find((d) => d.length > 3 && q.includes(d)) ||
+        famousDirectors.find((d) => q.includes(d));
 
       if (matchedDirectorKey) {
         const matchingCatalog = this.titles.filter((t) =>
@@ -2155,7 +2407,7 @@
         if (matchingCatalog.length > 0) {
           const dirName = matchingCatalog[0].director;
           return {
-            text: `From your curated collection, here are outstanding works directed by **${dirName}**. You can click **Details** or filter directly by this director:`,
+            text: `From your curated collection, here are standout works directed by **${dirName}**. Click any card to view full details or filter your library by this filmmaker:`,
             recommendations: matchingCatalog.slice(0, 4)
           };
         } else {
@@ -2171,7 +2423,7 @@
               const directed = (cData.crew || [])
                 .filter((c) => c.job === 'Director')
                 .sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
-                .slice(0, 3)
+                .slice(0, 4)
                 .map((c) => ({
                   id: 'tmdb_' + c.id,
                   imdbId: 'tmdb_' + c.id,
@@ -2185,7 +2437,7 @@
                 }));
 
               return {
-                text: `Here are acclaimed works by **${person.name}** discovered from the TMDB database. Tap **Add to Watchlist** on any title to immediately track it:`,
+                text: `Here are acclaimed works by **${person.name}** discovered from TMDB. Tap **Add to Watchlist** on any title to track it immediately:`,
                 recommendations: directed
               };
             }
@@ -2195,53 +2447,80 @@
         }
       }
 
-      // 2. Unwatched / What to watch tonight / Next
-      if (q.includes('what to watch') || q.includes('tonight') || q.includes('next') || q.includes('unwatched')) {
+      // 2. Festival Winners / 2024-2026 Releases
+      if (q.includes('festival') || q.includes('2024') || q.includes('2025') || q.includes('2026') || q.includes('winner') || q.includes('cannes') || q.includes('oscar')) {
+        const recentAcclaimed = this.titles
+          .filter((t) => ['2023', '2024', '2025', '2026'].includes(String(t.year)))
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        return {
+          text: `Here are **acclaimed 2024–2026 festival standouts & modern prestige releases** from your collection, ranked by critical reception:`,
+          recommendations: recentAcclaimed.slice(0, 4)
+        };
+      }
+
+      // 3. Surprise Me / Deep Cuts / Auteur Cinema
+      if (q.includes('surprise') || q.includes('deep cut') || q.includes('auteur') || q.includes('hidden gem') || q.includes('classic')) {
+        const deepCuts = this.titles.filter((t) =>
+          t.type === 'community' || (parseInt(t.year, 10) > 0 && parseInt(t.year, 10) <= 2005)
+        );
+        const shuffled = [...(deepCuts.length >= 3 ? deepCuts : this.titles)]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 4);
+        return {
+          text: `Here are **4 hand-picked auteur deep cuts & world cinema gems** from your archive—spanning poetic realism, psychological intrigue, and unforgettable visual storytelling:`,
+          recommendations: shuffled
+        };
+      }
+
+      // 4. Unwatched / What to watch tonight / Next
+      if (q.includes('what to watch') || q.includes('tonight') || q.includes('next') || q.includes('unwatched') || q.includes('recommend')) {
         const pool = unwatched.length > 0 ? unwatched : this.titles;
         const sorted = [...pool].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        const pick = sorted.slice(0, 3);
+        const pick = sorted.slice(0, 4);
 
         return {
-          text: `Based on your watchlist progress, here are **${pick.length} top unwatched priorities** to enjoy tonight. Each title represents pinnacle storytelling and visionary directing:`,
+          text: `Based on your active backlog of **${unwatched.length} unwatched titles**, here are **${pick.length} highest-rated priorities** for tonight:`,
           recommendations: pick
         };
       }
 
-      // 3. Sci-fi / Atmospheric / Mind-bending
-      if (q.includes('sci-fi') || q.includes('space') || q.includes('slow burn') || q.includes('atmospheric') || q.includes('mind-bending')) {
+      // 5. Sci-fi / Atmospheric / Mind-bending / Severance
+      if (q.includes('sci-fi') || q.includes('space') || q.includes('slow burn') || q.includes('atmospheric') || q.includes('mind-bending') || q.includes('severance') || q.includes('thriller')) {
         const sciFiMatches = this.titles.filter((t) => {
           const txt = `${t.title} ${t.overview} ${t.director}`.toLowerCase();
-          return txt.includes('space') || txt.includes('sci-fi') || txt.includes('future') || txt.includes('artificial') || txt.includes('dune') || txt.includes('interstellar') || txt.includes('severance');
+          return txt.includes('space') || txt.includes('sci-fi') || txt.includes('future') || txt.includes('artificial') || txt.includes('dune') || txt.includes('interstellar') || txt.includes('severance') || txt.includes('dark matter') || txt.includes('machina') || txt.includes('mulholland');
         });
 
         const pool = sciFiMatches.length > 0 ? sciFiMatches : this.titles;
         return {
-          text: `For lovers of **atmospheric, slow-burn, and mind-bending speculative fiction**, these cinematic journeys will completely absorb you:`,
-          recommendations: pool.slice(0, 3)
+          text: `For fans of **atmospheric, slow-burn, and mind-bending speculative storytelling**, these selections deliver unforgettable tension and world-building:`,
+          recommendations: pool.slice(0, 4)
         };
       }
 
-      // 4. Arthouse / A24 / Criterion / Romance
-      if (q.includes('arthouse') || q.includes('a24') || q.includes('romance') || q.includes('eternal sunshine') || q.includes('lobster') || q.includes('criterion')) {
-        const arthouse = this.titles.filter((t) => t.type === 'community' || (t.overview && (t.overview.toLowerCase().includes('love') || t.overview.toLowerCase().includes('relationship'))));
-        const pool = arthouse.length > 0 ? arthouse : this.titles.slice(0, 3);
+      // 6. Arthouse / A24 / Criterion / Romance
+      if (q.includes('arthouse') || q.includes('a24') || q.includes('romance') || q.includes('eternal sunshine') || q.includes('lobster') || q.includes('criterion') || q.includes('love')) {
+        const arthouse = this.titles.filter((t) => t.type === 'community' || (t.overview && (t.overview.toLowerCase().includes('love') || t.overview.toLowerCase().includes('relationship'))) || ['The Lobster', 'Past Lives', 'Eternal Sunshine', 'In the Mood for Love', 'Portrait of a Lady on Fire', 'Her'].includes(t.title));
+        const pool = arthouse.length > 0 ? arthouse : this.titles.slice(0, 4);
         return {
-          text: `Here are **poetic, introspective arthouse classics** that celebrate mood, striking aesthetics, and emotional resonance:`,
-          recommendations: pool.slice(0, 3)
+          text: `Here are **poetic, introspective arthouse & A24-style gems** that celebrate mood, striking aesthetics, and deep emotional resonance:`,
+          recommendations: pool.slice(0, 4)
         };
       }
 
-      // 5. TV Series / HBO / FX
+      // 7. TV Series / HBO / FX
       if (q.includes('tv') || q.includes('show') || q.includes('series') || q.includes('hbo') || q.includes('fx')) {
-        const tvList = this.titles.filter((t) => t.type === 'tv');
+        const tvList = this.titles
+          .filter((t) => t.type === 'tv')
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0));
         const pool = tvList.length > 0 ? tvList : this.titles;
         return {
-          text: `Here are **prestige television masterpieces** characterized by world-class writing, exceptional performances, and auteur direction:`,
-          recommendations: pool.slice(0, 3)
+          text: `Here are **prestige television masterpieces** from HBO, FX, and Apple TV+ featuring world-class writing and auteur direction:`,
+          recommendations: pool.slice(0, 4)
         };
       }
 
-      // 6. Fallback / General search via TMDB discovery
+      // 8. Fallback / General search via TMDB discovery
       try {
         const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
         const res = await fetch(`https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(rawQuery)}&api_key=${apiKey}`);
@@ -2249,7 +2528,7 @@
           const data = await res.json();
           const items = (data.results || [])
             .filter((i) => (i.media_type === 'movie' || i.media_type === 'tv') && i.poster_path)
-            .slice(0, 3)
+            .slice(0, 4)
             .map((i) => ({
               id: 'tmdb_' + i.id,
               imdbId: 'tmdb_' + i.id,
@@ -2264,7 +2543,7 @@
 
           if (items.length > 0) {
             return {
-              text: `I searched global cinema records matching **"${rawQuery}"**. Here are the most prominent titles:`,
+              text: `I searched global cinema records matching **"${rawQuery}"**. Here are the top matches you can add directly to your watchlist:`,
               recommendations: items
             };
           }
@@ -2275,8 +2554,8 @@
 
       // Default curated recommendations
       return {
-        text: `Here are **3 curated highlights** from your watchlist that deserve your immediate attention. Tap to explore details or track your viewing progress:`,
-        recommendations: this.titles.slice(0, 3)
+        text: `Here are **4 top-rated highlights** from your watchlist that deserve your attention tonight:`,
+        recommendations: [...this.titles].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 4)
       };
     }
   }

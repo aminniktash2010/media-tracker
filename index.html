@@ -47,6 +47,9 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-jump-ai" class="btn btn-ghost btn-ai-accent" title="Ask AI Cinema Curator">
+          <span>✨</span> AI Curator
+        </button>
         <button id="btn-add-director" class="btn btn-ghost" title="Import a director's filmography">
           <span>🎬</span> Add Director
         </button>
@@ -85,45 +88,94 @@
       </div>
     </section>
 
-    <!-- Sticky Filtering & Search Bar (accessible anywhere while scrolling) -->
+    <!-- Compact Top AI Cinema Curator Quick-Ask Bar (Never expands or shifts page layout) -->
+    <section class="ai-curator-spotlight" id="ai-curator-section" aria-label="AI Cinema Curator Quick Bar">
+      <div class="ai-spotlight-main">
+        <div class="ai-curator-title-group">
+          <div class="ai-curator-icon" aria-hidden="true">✨</div>
+          <div>
+            <div class="ai-curator-badge-row">
+              <h2 class="ai-curator-title">AI Cinema Curator</h2>
+              <span class="ai-live-badge"><span class="ai-live-dot"></span> Ready</span>
+            </div>
+            <p class="ai-curator-subtitle">Ask for personalized recommendations, mood picks, or director deep cuts</p>
+          </div>
+        </div>
+
+        <form id="ai-quick-form" class="ai-quick-form">
+          <div class="ai-input-field-wrap">
+            <span class="ai-input-sparkle" aria-hidden="true">✨</span>
+            <input 
+              type="text" 
+              id="ai-quick-input" 
+              class="ai-chat-input" 
+              placeholder="Ask AI Curator (e.g. 'What to watch tonight?', 'Films like Severance')…" 
+              autocomplete="off"
+            >
+          </div>
+          <button type="submit" class="btn btn-ai-send">
+            <span>Ask AI</span> <span>➤</span>
+          </button>
+          <button type="button" id="btn-toggle-chat" class="btn btn-ghost btn-open-drawer" title="Open AI Curator Chat Panel">
+            <span>💬</span> <span id="toggle-chat-label">Open Chat</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Inspiration Prompts (Click to open AI Chat Panel & ask) -->
+      <div class="ai-prompt-chips-wrapper">
+        <span class="ai-prompt-label">💡 Quick Prompts:</span>
+        <div class="ai-prompts-chips" id="prompts-chips"></div>
+      </div>
+    </section>
+
+    <!-- Sticky Filtering & Unified Omni-Search Bar -->
     <div class="sticky-filter-wrapper" id="sticky-filter-wrapper">
       <div class="sticky-filter-inner">
         <!-- Navigation Filter Pills -->
         <nav class="filter-bar" id="filter-bar" aria-label="Category Filters"></nav>
 
-        <!-- Search & Control Toolbar -->
-        <section class="controls-grid" aria-label="Search, director filter, and sorting controls">
-          <div class="search-wrapper">
-            <span class="search-icon" aria-hidden="true">🔍</span>
-            <input 
-              type="search" 
-              id="search-input" 
-              class="search-input" 
-              placeholder="Search by title, director, release year…" 
-              autocomplete="off"
-              spellcheck="false"
-            >
-            <button id="search-clear-btn" class="search-clear-btn" style="display: none;" title="Clear search">✕</button>
+        <!-- Unified Omni-Search (Titles + Directors + Internet Import) & Control Toolbar -->
+        <section class="controls-grid" aria-label="Unified search, director filter, and sorting controls">
+          <div class="unified-search-combobox director-filter-combobox" id="director-filter-combobox">
+            <div class="search-wrapper unified-search-wrapper">
+              <span class="search-icon" aria-hidden="true">🔍</span>
+
+              <!-- Inline Active Director Pill inside the Search Bar -->
+              <button type="button" id="inline-director-chip" class="inline-director-chip" style="display: none;" title="Click to clear director filter">
+                <span>🎬</span>
+                <span id="inline-director-chip-name"></span>
+                <span class="inline-chip-remove">✕</span>
+              </button>
+
+              <input 
+                type="search" 
+                id="search-input" 
+                class="search-input unified-search-input" 
+                placeholder="Search titles, directors, years — or type any filmmaker to import works…" 
+                autocomplete="off"
+                spellcheck="false"
+              >
+
+              <div class="unified-search-right-tools">
+                <button type="button" id="search-clear-btn" class="search-clear-btn" style="display: none;" title="Clear search & filters">✕</button>
+                <button type="button" id="btn-toggle-directors" class="btn-directors-trigger" title="Browse or filter by Director">
+                  <span>🎬</span>
+                  <span id="directors-trigger-label">Directors</span>
+                  <span class="trigger-caret">▾</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Unified Smart Dropdown: Library Directors, Matching Titles & TMDB Internet Importer -->
+            <div id="director-filter-dropdown" class="director-filter-dropdown unified-omni-dropdown" style="display: none;"></div>
+
+            <!-- Hidden legacy inputs preserved for compatibility -->
+            <input type="hidden" id="director-filter-input">
+            <button type="button" id="director-filter-clear-btn" style="display: none;"></button>
           </div>
 
           <div class="controls-actions">
-            <!-- Searchable Director Filter & Internet Importer Combobox -->
-            <div class="director-filter-combobox" id="director-filter-combobox">
-              <div class="director-combobox-input-wrapper">
-                <span class="director-combobox-icon" aria-hidden="true">🎬</span>
-                <input 
-                  type="text" 
-                  id="director-filter-input" 
-                  class="director-filter-input" 
-                  placeholder="Filter or Add Director…" 
-                  autocomplete="off"
-                  spellcheck="false"
-                >
-                <button type="button" id="director-filter-clear-btn" class="director-combobox-clear" style="display: none;" title="Clear director filter">✕</button>
-              </div>
-              <div id="director-filter-dropdown" class="director-filter-dropdown" style="display: none;"></div>
-            </div>
-
             <!-- Legacy fallback select kept in DOM for backward compatibility -->
             <select id="director-select" class="select-control director-select" title="Filter by Director" style="display: none;">
               <option value="">🎬 All Directors</option>
@@ -131,6 +183,8 @@
 
             <select id="sort-select" class="select-control" title="Sort watchlist">
               <option value="added">Sort: Recently Added</option>
+              <option value="rating-desc">Sort: Rating (Highest)</option>
+              <option value="rating-asc">Sort: Rating (Lowest)</option>
               <option value="director-asc">Sort: Director (A-Z)</option>
               <option value="year-desc">Sort: Year (Newest)</option>
               <option value="year-asc">Sort: Year (Oldest)</option>
@@ -175,68 +229,6 @@
 
     <!-- Dynamic Media Grid -->
     <section class="media-grid" id="media-grid" aria-live="polite"></section>
-
-    <!-- AI Cinema Curator & Interactive Chat Assistant -->
-    <section class="ai-curator-card" id="ai-curator-section" aria-label="AI Cinema Curator">
-      <div class="ai-curator-header">
-        <div class="ai-curator-title-group">
-          <div class="ai-curator-icon">✨</div>
-          <div>
-            <div class="ai-curator-badge-row">
-              <h3 class="ai-curator-title">AI Cinema Curator</h3>
-              <span class="ai-live-badge">Online • 125+ Titles Indexed</span>
-            </div>
-            <p class="ai-curator-subtitle">Ask questions, get personalized watchlist recommendations, or explore deep cuts</p>
-          </div>
-        </div>
-        <div class="ai-curator-header-actions">
-          <button type="button" id="btn-clear-chat" class="btn btn-ghost btn-sm" title="Clear chat history">Clear Chat</button>
-        </div>
-      </div>
-
-      <!-- Quick Inspiration Prompts (Click to ask AI) -->
-      <div class="ai-prompt-chips-wrapper">
-        <span class="ai-prompt-label">💡 Prompts:</span>
-        <div class="ai-prompts-chips" id="prompts-chips"></div>
-      </div>
-
-      <!-- Chat History Area -->
-      <div class="ai-chat-history" id="ai-chat-history">
-        <!-- Initial assistant greeting -->
-        <div class="chat-message assistant-message">
-          <div class="chat-avatar">✨</div>
-          <div class="chat-bubble">
-            <p>Hello Amin! I'm your <strong>AI Cinema Curator</strong>. I have indexed your entire curated catalog, directors, ratings, and TMDB intelligence.</p>
-            <p>Ask me what to watch tonight, request recommendations based on a mood (e.g. <em>atmospheric slow-burn sci-fi</em>), or ask for deep cuts by directors like <strong>Denis Villeneuve</strong>, <strong>Christopher Nolan</strong>, or <strong>Wong Kar-wai</strong>! Any recommended title can be added directly to your watchlist.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Typing Indicator -->
-      <div class="chat-typing-indicator" id="chat-typing-indicator" style="display: none;">
-        <div class="chat-avatar">✨</div>
-        <div class="typing-bubble">
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-text">AI Curator is thinking…</span>
-        </div>
-      </div>
-
-      <!-- Chat Input Toolbar -->
-      <form id="ai-chat-form" class="ai-chat-input-bar">
-        <input 
-          type="text" 
-          id="ai-chat-input" 
-          class="ai-chat-input" 
-          placeholder="Ask AI Curator (e.g. 'What should I watch if I love Severance?', 'Find me a 90s slow burn')…" 
-          autocomplete="off"
-        >
-        <button type="submit" class="btn btn-primary btn-chat-send" id="btn-chat-send">
-          <span>Ask</span> <span>➤</span>
-        </button>
-      </form>
-    </section>
 
   </main>
 
@@ -410,6 +402,81 @@
       </div>
     </div>
   </div>
+
+  <!-- Dedicated Modern AI Cinema Curator Slide-Over Panel -->
+  <div class="ai-drawer-backdrop" id="ai-chat-drawer" role="dialog" aria-modal="true" aria-labelledby="ai-drawer-title">
+    <aside class="ai-drawer-panel">
+      <!-- Fixed Drawer Header -->
+      <div class="ai-drawer-header">
+        <div class="ai-curator-title-group">
+          <div class="ai-curator-icon" aria-hidden="true">✨</div>
+          <div>
+            <div class="ai-curator-badge-row">
+              <h3 class="ai-curator-title" id="ai-drawer-title">AI Cinema Curator</h3>
+              <span class="ai-live-badge"><span class="ai-live-dot"></span> 125+ Titles Indexed</span>
+            </div>
+            <p class="ai-curator-subtitle">Personal Film Historian & Watchlist Advisor</p>
+          </div>
+        </div>
+        <div class="ai-drawer-header-actions">
+          <button type="button" id="btn-clear-chat" class="btn btn-ghost btn-sm" title="Reset conversation">Clear</button>
+          <button type="button" id="btn-close-chat-drawer" class="modal-close-btn" title="Close AI Curator (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Conversation Feed -->
+      <div class="ai-chat-history" id="ai-chat-history">
+        <div class="chat-message assistant-message">
+          <div class="chat-avatar">✨</div>
+          <div class="chat-bubble-wrap">
+            <div class="chat-sender-label">AI Cinema Curator</div>
+            <div class="chat-bubble">
+              <p>Hello Amin! I'm your <strong>AI Cinema Curator</strong>. I have indexed your entire curated catalog, directors, ratings, and live TMDB intelligence.</p>
+              <p>Ask me what to watch tonight, request recommendations by mood (e.g. <em>atmospheric slow-burn sci-fi</em>), or explore deep cuts by auteurs like <strong>Denis Villeneuve</strong>, <strong>Christopher Nolan</strong>, or <strong>Wong Kar-wai</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator inside Panel -->
+      <div class="chat-typing-indicator" id="chat-typing-indicator" style="display: none;">
+        <div class="chat-avatar">✨</div>
+        <div class="typing-bubble">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-text">Curating selections for you…</span>
+        </div>
+      </div>
+
+      <!-- Quick Suggestion Chips inside Drawer -->
+      <div class="ai-drawer-prompts">
+        <div class="ai-prompts-chips" id="drawer-prompts-chips"></div>
+      </div>
+
+      <!-- Pinned Bottom Chat Input Bar -->
+      <form id="ai-chat-form" class="ai-drawer-footer">
+        <div class="ai-input-field-wrap">
+          <input 
+            type="text" 
+            id="ai-chat-input" 
+            class="ai-chat-input" 
+            placeholder="Ask a follow-up, director, or mood…" 
+            autocomplete="off"
+          >
+        </div>
+        <button type="submit" class="btn btn-ai-send" id="btn-chat-send">
+          <span>Send</span> <span>➤</span>
+        </button>
+      </form>
+    </aside>
+  </div>
+
+  <!-- Floating AI Curator Quick-Access Button -->
+  <button type="button" id="fab-ai-curator" class="fab-ai-curator" title="Ask AI Cinema Curator">
+    <span class="fab-ai-icon">✨</span>
+    <span class="fab-ai-label">Ask AI Curator</span>
+  </button>
 
   <!-- Toast Notification -->
   <div class="toast-container">

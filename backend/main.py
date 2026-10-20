@@ -14,7 +14,7 @@ logger = logging.getLogger("media-curator-ai")
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "project-51459e90-fbb3-471f-9f9")
 GCP_REGION = os.environ.get("GCP_REGION", "us-central1")
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "15d2ea6d0dc1d476efbca3eba2b9bbfb")
-MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 
 app = FastAPI(
     title="Amin's Media Tracker - Vertex AI Curator API",
@@ -57,6 +57,8 @@ class MediaItemContext(BaseModel):
     director: Optional[str] = None
     type: Optional[str] = "movie"
     rating: Optional[float] = None
+    poster: Optional[str] = None
+    overview: Optional[str] = None
     watched: Optional[bool] = False
 
 class ChatRequest(BaseModel):
@@ -147,12 +149,23 @@ async def chat_with_curator(req: ChatRequest):
         item.director for item in req.watchlist if item.director and item.director != "Unknown"
     ))[:20]
 
+    history_lines = []
+    for turn in (req.history or [])[-6:]:
+        role = turn.get("role", "user")
+        content = turn.get("content", "")
+        if content:
+            history_lines.append(f"{role.upper()}: {content}")
+    history_block = "\n".join(history_lines) if history_lines else "No prior turns."
+
     context_prompt = f"""
 Current User Watchlist Context:
 - Total Titles in Library: {total_titles}
 - Watched Titles ({len(watched_titles)}): {', '.join(watched_titles[:15]) if watched_titles else 'None yet'}
 - Unwatched Backlog ({len(unwatched_titles)}): {', '.join(unwatched_titles[:20]) if unwatched_titles else 'Empty'}
 - Sample Directors in Library: {', '.join(directors_in_library) if directors_in_library else 'Various'}
+
+Recent Conversation History:
+{history_block}
 
 User Question / Request:
 {req.message}

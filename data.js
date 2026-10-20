@@ -162,15 +162,15 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "14",
-    "imdbId": "tt2194499",
+    "imdbId": "tt2310212",
     "title": "Mr Selfridge",
     "year": "2013",
     "type": "tv",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/ls6zswrOZVhCXQBh96DlbnLBajM.jpg",
-    "rating": 7.9,
-    "overview": "The night after another unsatisfactory New Year's party, Tim's father reveals to him that the men in their family have the ability to travel through time. They can't change history, but they can change what happens and has happened in their own lives. Thus begins the start of a lesson in learning to appreciate life itself as it is, as it comes, and most importantly, the people living alongside us.",
-    "director": "Richard Curtis"
+    "poster": "https://image.tmdb.org/t/p/w500/pm4wMixNf5QPYQbdt0tnkbhmQvW.jpg",
+    "rating": 6.9,
+    "overview": "Mr. Selfridge recounts the real life story of the flamboyant and visionary American founder of Selfridge's, London's lavish department store. Set in 1909 London, it follows Harry Gordon Selfridge ('Mile a Minute Harry'), a man with a mission to make shopping as thrilling as sex.",
+    "director": "Andrew Davies"
   },
   {
     "id": "15",
@@ -186,27 +186,27 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "16",
-    "imdbId": "tt0065377",
+    "imdbId": "tt0064165",
     "title": "The Things of Life",
     "year": "1970",
     "type": "movie",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/6iOKluJfyiU1SLZbGYrY7Z0i6k0.jpg",
-    "rating": 6.5,
-    "overview": "An airport manager tries to keep his terminals open during a snowstorm, while a suicide bomber plots to blow up a Boeing 707 airliner in flight.",
-    "director": "George Seaton"
+    "poster": "https://image.tmdb.org/t/p/w500/nC3b7VV5YcSkAF6WteQL8EF4lme.jpg",
+    "rating": 7.1,
+    "overview": "The mind of Pierre Bérard, a successful middle-aged architect, is torn between his unstable present with Hélène, his younger lover, and his happy memories of the past with Catherine, his ex-wife; but his true destiny awaits him at a crossroads on his way to Rennes.",
+    "director": "Claude Sautet"
   },
   {
     "id": "17",
-    "imdbId": "tt0062718",
+    "imdbId": "tt0063790",
     "title": "All My Good Countrymen",
     "year": "1968",
     "type": "movie",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/iTjo8qBVLsLB85pF9uLCPvfPnCq.jpg",
-    "rating": 8.0,
-    "overview": "From the lower St. Lawrence, a picture of whale hunting that looks more like a round-up, with a corral, whale-boys and all. In 1534, when he stopped at the island he named l'Île-aux-Coudres, Jacques Cartier saw how the Indians captured the little white beluga whales by setting a fence of saplings into off-shore mud. In the film, the islanders show that the old method still works, thanks to the trusting 'sea-pigs,' the same old tide, and a little magic.",
-    "director": "Michel Brault, Bernard Gosselin"
+    "poster": "https://image.tmdb.org/t/p/w500/hn0F5V3ZIjYbi7xTAkdGfRug6l6.jpg",
+    "rating": 7.6,
+    "overview": "The lives of seven friends in a small Moravian town from the end of World War II in May 1945 through the turbulent collectivization of the 1950s.",
+    "director": "Vojtěch Jasný"
   },
   {
     "id": "18",
@@ -258,15 +258,15 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "22",
-    "imdbId": "tt1010048",
+    "imdbId": "tt1517451",
     "title": "A Star Is Born",
     "year": "2018",
     "type": "movie",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/5leCCi7ZF0CawAfM5Qo2ECKPprc.jpg",
-    "rating": 7.7,
-    "overview": "A teenager reflects on his life after being accused of cheating on the Indian version of \"Who Wants to be a Millionaire?\".",
-    "director": "Danny Boyle"
+    "poster": "https://image.tmdb.org/t/p/w500/wrFpXMNBRj2PBiN4Z5kix51XaIZ.jpg",
+    "rating": 7.5,
+    "overview": "Seasoned musician Jackson Maine discovers — and falls in love with — struggling artist Ally. She has just about given up on her dream to make it big as a singer — until Jack coaxes her into the spotlight.",
+    "director": "Bradley Cooper"
   },
   {
     "id": "23",
@@ -390,15 +390,15 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "33",
-    "imdbId": "tt22022452",
+    "imdbId": "tt30321095",
     "title": "Verity",
     "year": "2026",
     "type": "movie",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
-    "rating": 7.5,
-    "overview": "Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for something entirely unexpected: new Emotions! Joy, Sadness, Anger, Fear and Disgust, who’ve long been running a successful operation by all accounts, aren’t sure how to feel when Anxiety shows up. And it looks like she’s not alone.",
-    "director": "Kelsey Mann"
+    "poster": "https://image.tmdb.org/t/p/w500/zPHfsaiMZT1HNz1ZS55iyLKZkFG.jpg",
+    "rating": 6.8,
+    "overview": "Lowen Ashleigh, a struggling writer hired to complete the remaining books in a successful series after bestselling author Verity Crawford is unable to finish them, uncovers a chilling unfinished autobiography hiding dark family secrets.",
+    "director": "Michael Showalter"
   },
   {
     "id": "34",
@@ -1002,27 +1002,27 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "84",
-    "imdbId": "tt20969586",
+    "imdbId": "tt26545355",
     "title": "Lanterns",
-    "year": "HBO",
+    "year": "2026",
     "type": "tv",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",
-    "rating": 7.3,
-    "overview": "After finding themselves ensnared in a death trap, seven disillusioned castoffs must embark on a dangerous mission that will force them to confront the darkest corners of their pasts.",
-    "director": "Jake Schreier"
+    "poster": "https://image.tmdb.org/t/p/w500/rb94rKVIzLyfWufIN7WqLvadBDH.jpg",
+    "rating": 8.2,
+    "overview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
+    "director": "Chris Mundy, Damon Lindelof"
   },
   {
     "id": "85",
-    "imdbId": "tt21209876",
+    "imdbId": "tt32860812",
     "title": "Stuart Fails To Save the Universe",
-    "year": "2025",
+    "year": "2026",
     "type": "tv",
     "isNew": true,
-    "poster": "https://image.tmdb.org/t/p/w500/geCRueV3ElhRTr0xtJuEWJt6dJ1.jpg",
-    "rating": 8.7,
-    "overview": "They say whatever doesn’t kill you makes you stronger, but that’s not the case for the world’s weakest hunter Sung Jinwoo. After being brutally slaughtered by monsters in a high-ranking dungeon, Jinwoo came back with the System, a program only he could see, that’s leveling him up in every way. Now, he’s inspired to discover the secrets behind his powers and the dungeon that spawned them.",
-    "director": "Asa Suehira"
+    "poster": "https://image.tmdb.org/t/p/w500/2koX1xLkpTQM4IZebYvKysFW1Nh.jpg",
+    "rating": 7.8,
+    "overview": "Comic book store owner Stuart Bloom is tasked with restoring reality after he breaks a device built by Sheldon and Leonard, accidentally bringing about a multiverse Armageddon.",
+    "director": "Chuck Lorre, Bill Prady, Zak Penn"
   },
   {
     "id": "86",
@@ -1254,14 +1254,14 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "105",
-    "imdbId": "tt2527336",
+    "imdbId": "tt5726616",
     "title": "Call Me by Your Name",
     "year": "2017",
     "type": "movie",
     "isNew": false,
-    "poster": "https://image.tmdb.org/t/p/w500/kOVEVeg59E0wsnXmF9nrh6OmWII.jpg",
-    "rating": 6.7,
-    "overview": "Rey develops her newly discovered abilities with the guidance of Luke Skywalker, who is unsettled by the strength of her powers. Meanwhile, the Resistance prepares to do battle with the First Order.",
+    "poster": "https://image.tmdb.org/t/p/w500/gXiE0WveDnT0n5J4sW9TMxXF4oT.jpg",
+    "rating": 8.1,
+    "overview": "In the summer of 1983, 17-year-old Elio spends his days in his family's 17th-century villa in northern Italy. One day Oliver, a graduate student, arrives to assist Elio's father, a professor of Greco-Roman culture, and the two discover a summer that alters their lives forever.",
     "director": "Luca Guadagnino"
   },
   {
@@ -1410,14 +1410,14 @@ const INITIAL_WATCHLIST = [
   },
   {
     "id": "118",
-    "imdbId": "tt2209418",
+    "imdbId": "tt2278871",
     "title": "Blue Is the Warmest Color",
     "year": "2013",
     "type": "movie",
     "isNew": false,
-    "poster": "https://image.tmdb.org/t/p/w500/qbGKJmNUroDz75kh5Oafoall89e.jpg",
+    "poster": "https://image.tmdb.org/t/p/w500/kgUk1wti2cvrptIgUz0VTAtSF6w.jpg",
     "rating": 7.5,
-    "overview": "It has been nine years since we last met Jesse and Celine, the French-American couple who once met on a train in Vienna. They now live in Paris with twin daughters but have spent a summer in Greece at the invitation of an author colleague of Jesse's. When the vacation is over and Jesse must send his teenage son off to the States, he begins to question his life decisions, and his relationship with Celine is at risk.",
+    "overview": "Adèle's life is changed when she meets Emma, a young woman with blue hair, who allows her to discover desire and assert herself as a woman and an adult. In front of others, Adèle grows, seeks herself, loses herself, and ultimately finds herself through love and heartbreak.",
     "director": "Abdellatif Kechiche"
   },
   {
