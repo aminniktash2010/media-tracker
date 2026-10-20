@@ -141,6 +141,7 @@
         modalTitle: document.getElementById('modal-title'),
         modalForm: document.getElementById('modal-form'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
+        modalCancelBtn: document.getElementById('modal-cancel-btn'),
         // Add/Edit Modal Autocomplete
         inputTitle: document.getElementById('input-title'),
         titleAutocompleteDropdown: document.getElementById('title-autocomplete-dropdown'),
@@ -256,46 +257,58 @@
       }
 
       // Add/Edit Modal Events
-      this.dom.modalCloseBtn.addEventListener('click', () => this.closeModal());
-      this.dom.modalCancelBtn.addEventListener('click', () => this.closeModal());
-      this.dom.modalBackdrop.addEventListener('click', (e) => {
-        if (e.target === this.dom.modalBackdrop) this.closeModal();
-      });
+      if (this.dom.modalCloseBtn) this.dom.modalCloseBtn.addEventListener('click', () => this.closeModal());
+      if (this.dom.modalCancelBtn) this.dom.modalCancelBtn.addEventListener('click', () => this.closeModal());
+      if (this.dom.modalBackdrop) {
+        this.dom.modalBackdrop.addEventListener('click', (e) => {
+          if (e.target === this.dom.modalBackdrop) this.closeModal();
+        });
+      }
 
       // Details Modal Events
-      this.dom.detailCloseBtn.addEventListener('click', () => this.closeDetailModal());
-      this.dom.detailsBackdrop.addEventListener('click', (e) => {
-        if (e.target === this.dom.detailsBackdrop) this.closeDetailModal();
-      });
+      if (this.dom.detailCloseBtn) this.dom.detailCloseBtn.addEventListener('click', () => this.closeDetailModal());
+      if (this.dom.detailsBackdrop) {
+        this.dom.detailsBackdrop.addEventListener('click', (e) => {
+          if (e.target === this.dom.detailsBackdrop) this.closeDetailModal();
+        });
+      }
 
-      this.dom.detailToggleWatched.addEventListener('click', () => {
-        if (this.activeDetailItem) {
-          this.toggleWatched(this.activeDetailItem.id);
-          this.openDetailModal(this.titles.find((t) => t.id === this.activeDetailItem.id));
-        }
-      });
+      if (this.dom.detailToggleWatched) {
+        this.dom.detailToggleWatched.addEventListener('click', () => {
+          if (this.activeDetailItem) {
+            this.toggleWatched(this.activeDetailItem.id);
+            this.openDetailModal(this.titles.find((t) => t.id === this.activeDetailItem.id));
+          }
+        });
+      }
 
-      this.dom.detailFilterDirector.addEventListener('click', () => {
-        if (this.activeDetailItem && this.activeDetailItem.director) {
-          const dir = this.activeDetailItem.director;
-          this.closeDetailModal();
-          this.setDirectorFilter(dir);
-        }
-      });
+      if (this.dom.detailFilterDirector) {
+        this.dom.detailFilterDirector.addEventListener('click', () => {
+          if (this.activeDetailItem && this.activeDetailItem.director) {
+            const dir = this.activeDetailItem.director;
+            this.closeDetailModal();
+            this.setDirectorFilter(dir);
+          }
+        });
+      }
 
-      this.dom.detailEditBtn.addEventListener('click', () => {
-        if (this.activeDetailItem) {
-          const id = this.activeDetailItem.id;
-          this.closeDetailModal();
-          this.openEditModal(id);
-        }
-      });
+      if (this.dom.detailEditBtn) {
+        this.dom.detailEditBtn.addEventListener('click', () => {
+          if (this.activeDetailItem) {
+            const id = this.activeDetailItem.id;
+            this.closeDetailModal();
+            this.openEditModal(id);
+          }
+        });
+      }
 
-      this.dom.detailCopyImdb.addEventListener('click', () => {
-        if (this.activeDetailItem) {
-          this.copyPrompt(this.activeDetailItem.imdbId);
-        }
-      });
+      if (this.dom.detailCopyImdb) {
+        this.dom.detailCopyImdb.addEventListener('click', () => {
+          if (this.activeDetailItem) {
+            this.copyPrompt(this.activeDetailItem.imdbId);
+          }
+        });
+      }
 
       // Director Filmography Modal Events
       if (this.dom.directorModalCloseBtn) {
@@ -376,16 +389,22 @@
         }
       });
 
-      this.dom.modalForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.handleFormSubmit();
-      });
+      if (this.dom.modalForm) {
+        this.dom.modalForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.handleFormSubmit();
+        });
+      }
 
       // Export & Backup
-      this.dom.btnExportCsv.addEventListener('click', () => this.exportCsv());
-      this.dom.btnExportJson.addEventListener('click', () => this.exportJson());
-      this.dom.btnImportJson.addEventListener('click', () => this.dom.fileInputJson.click());
-      this.dom.fileInputJson.addEventListener('change', (e) => this.importJson(e));
+      if (this.dom.btnExportCsv) this.dom.btnExportCsv.addEventListener('click', () => this.exportCsv());
+      if (this.dom.btnExportJson) this.dom.btnExportJson.addEventListener('click', () => this.exportJson());
+      if (this.dom.btnImportJson && this.dom.fileInputJson) {
+        this.dom.btnImportJson.addEventListener('click', () => this.dom.fileInputJson.click());
+      }
+      if (this.dom.fileInputJson) {
+        this.dom.fileInputJson.addEventListener('change', (e) => this.importJson(e));
+      }
 
       // Prompts
       this.renderPrompts();
