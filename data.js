@@ -1,7 +1,7 @@
 /**
  * Curated Watchlist Data
  * 125 curated cinema titles, prestige television, and arthouse classics.
- * Enriched with verified TMDB CDN high-resolution posters, ratings, and synopses.
+ * Enriched with verified TMDB CDN high-resolution posters, ratings, synopses, and directors.
  * Compatible with both ES Modules and standard browser script loading (file://).
  */
 const INITIAL_WATCHLIST = [
@@ -13,7 +13,8 @@ const INITIAL_WATCHLIST = [
     "type": "movie",
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/xqovj2p6HRsgHxN81qYAYF4StgM.jpg",
-    "overview": "An Artificial Friend named Klara finds a deep bond with a troubled young girl, bringing light and hope to a grieving family through her unwavering devotion and innocent wonder."
+    "overview": "An Artificial Friend named Klara finds a deep bond with a troubled young girl, bringing light and hope to a grieving family through her unwavering devotion and innocent wonder.",
+    "director": "Taika Waititi"
   },
   {
     "id": "2",
@@ -24,7 +25,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/vjTYUTgh9nO88i6HZ4YPRhiFL05.jpg",
     "rating": 6.7,
-    "overview": "Following the death of his father, Jay Gardiner goes diving off the central Coast of California in search of his remains, but is swallowed by a massive sperm whale. While trapped inside its belly with only one hour of oxygen left, Jay comes to realize that the hard-earned lessons his father imparted may be the key to his escape."
+    "overview": "Following the death of his father, Jay Gardiner goes diving off the central Coast of California in search of his remains, but is swallowed by a massive sperm whale. While trapped inside its belly with only one hour of oxygen left, Jay comes to realize that the hard-earned lessons his father imparted may be the key to his escape.",
+    "director": "Brian Duffield"
   },
   {
     "id": "3",
@@ -35,7 +37,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/Ap8QwmKfSjYbWC4XIP8w9pdn72O.jpg",
     "rating": 8.5,
-    "overview": "Thirty-four days before she's sent to prison, notorious Silicon Valley founder Elizabeth Holmes invites a skeptical film crew to document her every move. What begins as an intimate portrait of an enigmatic felon becomes a mind-bending three-year journey into the abyss."
+    "overview": "Thirty-four days before she's sent to prison, notorious Silicon Valley founder Elizabeth Holmes invites a skeptical film crew to document her every move. What begins as an intimate portrait of an enigmatic felon becomes a mind-bending three-year journey into the abyss.",
+    "director": "Nathan Fielder, Lance Oppenheim"
   },
   {
     "id": "4",
@@ -46,7 +49,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/eI0QW02PYqhnmIvLRdn9vrfVVP7.jpg",
     "rating": 8.3,
-    "overview": "A determined man embarks on a high-stakes quest—and defies seemingly impossible odds—to fulfill his dream of being the first to reach the summit of Mount Everest."
+    "overview": "A determined man embarks on a high-stakes quest—and defies seemingly impossible odds—to fulfill his dream of being the first to reach the summit of Mount Everest.",
+    "director": "Jennifer Peedom"
   },
   {
     "id": "5",
@@ -57,7 +61,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/lmrulvLbmaejTix1YaMxo1oGhH1.jpg",
     "rating": 6.8,
-    "overview": "In 2006, To Catch a Predator host Chris Hansen sets out to make television history. When a high stakes operation goes fatally wrong, his veneered dream of fame curdles into a nightmare of performative justice."
+    "overview": "In 2006, To Catch a Predator host Chris Hansen sets out to make television history. When a high stakes operation goes fatally wrong, his veneered dream of fame curdles into a nightmare of performative justice.",
+    "director": "Lance Oppenheim"
   },
   {
     "id": "6",
@@ -68,7 +73,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
     "rating": 7.4,
-    "overview": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements."
+    "overview": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
+    "director": "David Ayer"
   },
   {
     "id": "7",
@@ -79,7 +85,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/5jCpQnWPikggmQZoDp1eAi6BI6w.jpg",
     "rating": 8.1,
-    "overview": "Matt Hagen's meteoric rise from Gotham street kid to Hollywood leading man is tragically cut short when a local crime boss's actions leave him horribly disfigured. Abandoned by his team and with nothing left, Matt seeks out a cutting edge treatment that miraculously returns him to his former self… but also unexpectedly affects his grip on reality, spiraling him down a destructive path of all-consuming revenge."
+    "overview": "Matt Hagen's meteoric rise from Gotham street kid to Hollywood leading man is tragically cut short when a local crime boss's actions leave him horribly disfigured. Abandoned by his team and with nothing left, Matt seeks out a cutting edge treatment that miraculously returns him to his former self… but also unexpectedly affects his grip on reality, spiraling him down a destructive path of all-consuming revenge.",
+    "director": "James Watkins"
   },
   {
     "id": "8",
@@ -90,7 +97,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/AtCR5LMuvwepTi1kipKq878Rbuq.jpg",
     "rating": 7.4,
-    "overview": "An anthology series set in the elite world of London law following two rival firms, Cathcarts and Taylor & Byrne, as they face off in a different headline-making legal battle each season."
+    "overview": "An anthology series set in the elite world of London law following two rival firms, Cathcarts and Taylor & Byrne, as they face off in a different headline-making legal battle each season.",
+    "director": "George Kay"
   },
   {
     "id": "9",
@@ -101,7 +109,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg",
     "rating": 7.6,
-    "overview": "When emergency dispatcher Ian Ridley receives a frantic call from a teenager he believes could be his long-missing daughter, he stops at nothing to find her."
+    "overview": "When emergency dispatcher Ian Ridley receives a frantic call from a teenager he believes could be his long-missing daughter, he stops at nothing to find her.",
+    "director": "Various Directors"
   },
   {
     "id": "10",
@@ -112,7 +121,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/huxmY6Dmzwpv5Q2hnNft0UMK7vf.jpg",
     "rating": 8.2,
-    "overview": "Follows the lives and families of three adults living and growing up in the United States of America in present and past times. As their paths cross and their life stories intertwine in curious ways, we find that several of them share the same birthday - and so much more than anyone would expect."
+    "overview": "Follows the lives and families of three adults living and growing up in the United States of America in present and past times. As their paths cross and their life stories intertwine in curious ways, we find that several of them share the same birthday - and so much more than anyone would expect.",
+    "director": "Dan Fogelman"
   },
   {
     "id": "11",
@@ -123,7 +133,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/1M876KPjulVwppEpldhdc8V4o68.jpg",
     "rating": 8.2,
-    "overview": "The gripping, decades-spanning inside story of Her Majesty Queen Elizabeth II and the Prime Ministers who shaped Britain's post-war destiny. \n\nThe Crown tells the inside story of two of the most famous addresses in the world – Buckingham Palace and 10 Downing Street – and the intrigues, love lives and machinations behind the great events that shaped the second half of the 20th century. Two houses, two courts, one Crown."
+    "overview": "The gripping, decades-spanning inside story of Her Majesty Queen Elizabeth II and the Prime Ministers who shaped Britain's post-war destiny. \n\nThe Crown tells the inside story of two of the most famous addresses in the world – Buckingham Palace and 10 Downing Street – and the intrigues, love lives and machinations behind the great events that shaped the second half of the 20th century. Two houses, two courts, one Crown.",
+    "director": "Peter Morgan"
   },
   {
     "id": "12",
@@ -134,7 +145,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/zS7fQiOZiKCVH2vlYSiIsFWW8hh.jpg",
     "rating": 8.1,
-    "overview": "It’s 1958 Manhattan and Miriam “Midge” Maisel has everything she’s ever wanted - the perfect husband, kids, and Upper West Side apartment. But when her life suddenly takes a turn and Midge must start over, she discovers a previously unknown talent - one that will take her all the way from the comedy clubs of Greenwich Village to a spot on Johnny Carson’s couch."
+    "overview": "It’s 1958 Manhattan and Miriam “Midge” Maisel has everything she’s ever wanted - the perfect husband, kids, and Upper West Side apartment. But when her life suddenly takes a turn and Midge must start over, she discovers a previously unknown talent - one that will take her all the way from the comedy clubs of Greenwich Village to a spot on Johnny Carson’s couch.",
+    "director": "Amy Sherman-Palladino"
   },
   {
     "id": "13",
@@ -145,7 +157,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/gJiaterDM3tZ2yioR24RzJpLhzD.jpg",
     "rating": 7.1,
-    "overview": "A woman suspects her husband of having an affair. After following several lines of enquiries far more unravels including a streak of violence below the surface."
+    "overview": "A woman suspects her husband of having an affair. After following several lines of enquiries far more unravels including a streak of violence below the surface.",
+    "director": "Mike Bartlett"
   },
   {
     "id": "14",
@@ -156,7 +169,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/ls6zswrOZVhCXQBh96DlbnLBajM.jpg",
     "rating": 7.9,
-    "overview": "The night after another unsatisfactory New Year's party, Tim's father reveals to him that the men in their family have the ability to travel through time. They can't change history, but they can change what happens and has happened in their own lives. Thus begins the start of a lesson in learning to appreciate life itself as it is, as it comes, and most importantly, the people living alongside us."
+    "overview": "The night after another unsatisfactory New Year's party, Tim's father reveals to him that the men in their family have the ability to travel through time. They can't change history, but they can change what happens and has happened in their own lives. Thus begins the start of a lesson in learning to appreciate life itself as it is, as it comes, and most importantly, the people living alongside us.",
+    "director": "Richard Curtis"
   },
   {
     "id": "15",
@@ -167,7 +181,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/epNfFs0gPyrpekecpzyX0XTkZgI.jpg",
     "rating": 8.1,
-    "overview": "Mary, Queen of Scots, faces political and sexual intrigue in the treacherous world of the French court."
+    "overview": "Mary, Queen of Scots, faces political and sexual intrigue in the treacherous world of the French court.",
+    "director": "Laurie McCarthy, Stephanie Sengupta"
   },
   {
     "id": "16",
@@ -178,7 +193,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/6iOKluJfyiU1SLZbGYrY7Z0i6k0.jpg",
     "rating": 6.5,
-    "overview": "An airport manager tries to keep his terminals open during a snowstorm, while a suicide bomber plots to blow up a Boeing 707 airliner in flight."
+    "overview": "An airport manager tries to keep his terminals open during a snowstorm, while a suicide bomber plots to blow up a Boeing 707 airliner in flight.",
+    "director": "George Seaton"
   },
   {
     "id": "17",
@@ -189,7 +205,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/iTjo8qBVLsLB85pF9uLCPvfPnCq.jpg",
     "rating": 8.0,
-    "overview": "From the lower St. Lawrence, a picture of whale hunting that looks more like a round-up, with a corral, whale-boys and all. In 1534, when he stopped at the island he named l'Île-aux-Coudres, Jacques Cartier saw how the Indians captured the little white beluga whales by setting a fence of saplings into off-shore mud. In the film, the islanders show that the old method still works, thanks to the trusting 'sea-pigs,' the same old tide, and a little magic."
+    "overview": "From the lower St. Lawrence, a picture of whale hunting that looks more like a round-up, with a corral, whale-boys and all. In 1534, when he stopped at the island he named l'Île-aux-Coudres, Jacques Cartier saw how the Indians captured the little white beluga whales by setting a fence of saplings into off-shore mud. In the film, the islanders show that the old method still works, thanks to the trusting 'sea-pigs,' the same old tide, and a little magic.",
+    "director": "Michel Brault, Bernard Gosselin"
   },
   {
     "id": "18",
@@ -200,7 +217,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/AmRdjyd5nVBd06FzJT8xoTS43ct.jpg",
     "rating": 7.5,
-    "overview": "An exiled filmmaker finally returns to his home country where former mysteries and afflictions of his early life come back to haunt him once more."
+    "overview": "An exiled filmmaker finally returns to his home country where former mysteries and afflictions of his early life come back to haunt him once more.",
+    "director": "Theo Angelopoulos"
   },
   {
     "id": "19",
@@ -211,7 +229,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/lcFetpSuVvYyIRWaufDEMc0hKfy.jpg",
     "rating": 6.2,
-    "overview": "What had initially started out as a Jewish revolt against the Roman occupation, quickly turned into a fierce civil war. The combination of religious messianic zeal and the friction between social classes proved disastrous and resulted in the destruction of Jerusalem and the Holy Temple."
+    "overview": "What had initially started out as a Jewish revolt against the Roman occupation, quickly turned into a fierce civil war. The combination of religious messianic zeal and the friction between social classes proved disastrous and resulted in the destruction of Jerusalem and the Holy Temple.",
+    "director": "Gidi Dar"
   },
   {
     "id": "20",
@@ -222,7 +241,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/mStaOzKKMOODJGhiQsrhCvIOPmt.jpg",
     "rating": 6.6,
-    "overview": "A shy and insecure delivery driver arrives on the scene of a robbery-gone-wrong and picks up two bags of cash and hides them in his truck. He is interrogated by two tough police detectives and manages to evade suspicion but he is warned that whoever owns the money will be looking for it. Only the help of a prostitute and a former biker recently released from jail might get him out of trouble."
+    "overview": "A shy and insecure delivery driver arrives on the scene of a robbery-gone-wrong and picks up two bags of cash and hides them in his truck. He is interrogated by two tough police detectives and manages to evade suspicion but he is warned that whoever owns the money will be looking for it. Only the help of a prostitute and a former biker recently released from jail might get him out of trouble.",
+    "director": "Denys Arcand"
   },
   {
     "id": "21",
@@ -233,7 +253,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/y4LvHQoX5YunHJ2EMBSjQvOkvD9.jpg",
     "rating": 7.0,
-    "overview": "Famed but tormented artist Vincent van Gogh spends his final years in Arles, France, painting masterworks of the natural world that surrounds him."
+    "overview": "Famed but tormented artist Vincent van Gogh spends his final years in Arles, France, painting masterworks of the natural world that surrounds him.",
+    "director": "Julian Schnabel"
   },
   {
     "id": "22",
@@ -244,7 +265,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/5leCCi7ZF0CawAfM5Qo2ECKPprc.jpg",
     "rating": 7.7,
-    "overview": "A teenager reflects on his life after being accused of cheating on the Indian version of \"Who Wants to be a Millionaire?\"."
+    "overview": "A teenager reflects on his life after being accused of cheating on the Indian version of \"Who Wants to be a Millionaire?\".",
+    "director": "Danny Boyle"
   },
   {
     "id": "23",
@@ -255,7 +277,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/b1SQETW5XglZb8eGnmb648lVANw.jpg",
     "rating": 6.1,
-    "overview": "Catherine and David Stewart are a well-to-do couple living in a posh area of Toronto, but all is not well in paradise. Catherine suspects that David is cheating on her, so she hires an escort named Chloe to meet David and see if he gives in to temptation — but events spin out of control when Chloe spills the details of her torrid encounters."
+    "overview": "Catherine and David Stewart are a well-to-do couple living in a posh area of Toronto, but all is not well in paradise. Catherine suspects that David is cheating on her, so she hires an escort named Chloe to meet David and see if he gives in to temptation — but events spin out of control when Chloe spills the details of her torrid encounters.",
+    "director": "Atom Egoyan"
   },
   {
     "id": "24",
@@ -266,7 +289,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/9wgDyz5aWWqttK73WXSqB1dpFTy.jpg",
     "rating": 5.8,
-    "overview": "A color-blind psychiatrist is stalked by an unknown killer after taking over his murdered friend's therapy group and becomes embroiled in an intense affair with a mysterious woman who may be connected to the crime."
+    "overview": "A color-blind psychiatrist is stalked by an unknown killer after taking over his murdered friend's therapy group and becomes embroiled in an intense affair with a mysterious woman who may be connected to the crime.",
+    "director": "Richard Rush"
   },
   {
     "id": "25",
@@ -277,7 +301,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/uOVGbT6TR8qiZiruX66yBRXq9Nv.jpg",
     "rating": 6.2,
-    "overview": "Sophie and James purchase a lifelike robot to cook and clean at their sprawling new home. At first, android Henry is quiet and hard-working. But as his artificial-intelligence programming kicks in, Henry starts to anticipate the couple’s needs and desires."
+    "overview": "Sophie and James purchase a lifelike robot to cook and clean at their sprawling new home. At first, android Henry is quiet and hard-working. But as his artificial-intelligence programming kicks in, Henry starts to anticipate the couple’s needs and desires.",
+    "director": "Josh Janowicz"
   },
   {
     "id": "26",
@@ -288,7 +313,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/xSKuXQb1VAUlyULUE4tkGTDbGdQ.jpg",
     "rating": 6.0,
-    "overview": "Elle is a young entrepreneur who wants to lead her grandmother Margot's fashion house into a new era. She is in a relationship with Thilo, the son of an influential Hamburg family. After Elle's grandmother receives anonymous threats, Ben, who has been in prison, is assigned as her bodyguard. Elle is torn between Thilo and Ben. As Elle delves deeper into Ben's world, she learns secrets about Thilo that could jeopardize her grandmother's life's work."
+    "overview": "Elle is a young entrepreneur who wants to lead her grandmother Margot's fashion house into a new era. She is in a relationship with Thilo, the son of an influential Hamburg family. After Elle's grandmother receives anonymous threats, Ben, who has been in prison, is assigned as her bodyguard. Elle is torn between Thilo and Ben. As Elle delves deeper into Ben's world, she learns secrets about Thilo that could jeopardize her grandmother's life's work.",
+    "director": "Tim Trachte"
   },
   {
     "id": "27",
@@ -299,7 +325,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/8ThaGfEW2tJleBYRUXQ6UUOl00d.jpg",
     "rating": 7.1,
-    "overview": "Humbert Humbert is a middle-aged British novelist who is both appalled by and attracted to the vulgarity of American culture. When he comes to stay at the boarding house run by Charlotte Haze, he soon becomes obsessed with Lolita, the woman's teenaged daughter."
+    "overview": "Humbert Humbert is a middle-aged British novelist who is both appalled by and attracted to the vulgarity of American culture. When he comes to stay at the boarding house run by Charlotte Haze, he soon becomes obsessed with Lolita, the woman's teenaged daughter.",
+    "director": "Adrian Lyne"
   },
   {
     "id": "28",
@@ -310,7 +337,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/5qHoazZiaLe7oFBok7XlUhg96f2.jpg",
     "rating": 6.7,
-    "overview": "After an amazing first date, Bea and Ben’s fiery attraction turns ice cold — until they find themselves unexpectedly reunited at a destination wedding in Australia. So they do what any two mature adults would do: pretend to be a couple."
+    "overview": "After an amazing first date, Bea and Ben’s fiery attraction turns ice cold — until they find themselves unexpectedly reunited at a destination wedding in Australia. So they do what any two mature adults would do: pretend to be a couple.",
+    "director": "Will Gluck"
   },
   {
     "id": "29",
@@ -321,7 +349,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/a4Ce3qHqIyHM3QfGsiVTAu3YADJ.jpg",
     "rating": 6.3,
-    "overview": "New York City is full of lonely hearts seeking the right match, and what Alice, Robin, Lucy, Meg, Tom and David all have in common is the need to learn how to be single in a world filled with ever-evolving definitions of love."
+    "overview": "New York City is full of lonely hearts seeking the right match, and what Alice, Robin, Lucy, Meg, Tom and David all have in common is the need to learn how to be single in a world filled with ever-evolving definitions of love.",
+    "director": "Christian Ditter"
   },
   {
     "id": "30",
@@ -332,7 +361,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/wZLM2uKJRYNchLmiCIjosX0rXy8.jpg",
     "rating": 7.0,
-    "overview": "Maggie is an alluring free spirit who won't let anyone – or anything – tie her down. But she meets her match in Jamie, whose relentless and nearly infallible charm serves him well with the ladies and the cutthroat world of pharmaceutical sales. Maggie and Jamie's evolving relationship takes them both by surprise, as they find themselves under the influence of the ultimate drug: love."
+    "overview": "Maggie is an alluring free spirit who won't let anyone – or anything – tie her down. But she meets her match in Jamie, whose relentless and nearly infallible charm serves him well with the ladies and the cutthroat world of pharmaceutical sales. Maggie and Jamie's evolving relationship takes them both by surprise, as they find themselves under the influence of the ultimate drug: love.",
+    "director": "Edward Zwick"
   },
   {
     "id": "31",
@@ -343,7 +373,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/2NTqe5MGx5YAXyQuMvwXSevNHeQ.jpg",
     "rating": 6.8,
-    "overview": "Caroline, a young waitress who seems to have bad taste in men, is on her way home one night when thugs attempt to rape her. Adam, the mysterious busboy who works at the same diner, helps fight off the assailants, and she begins a relationship with him -- but not all their fellow Minnesotans are happy for them. Meanwhile, the couple face their own difficulties when Caroline finds about Adam's past, including his unique health condition."
+    "overview": "Caroline, a young waitress who seems to have bad taste in men, is on her way home one night when thugs attempt to rape her. Adam, the mysterious busboy who works at the same diner, helps fight off the assailants, and she begins a relationship with him -- but not all their fellow Minnesotans are happy for them. Meanwhile, the couple face their own difficulties when Caroline finds about Adam's past, including his unique health condition.",
+    "director": "Tony Bill"
   },
   {
     "id": "32",
@@ -354,7 +385,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/myd1K3gefdNAWFsGNRDdMeiK9Qg.jpg",
     "rating": 7.9,
-    "overview": "While celebrating their last night together, high school graduates and best friends Jo and Raissa stumble upon a mysterious portal that transports them to the fantastical island of Nakali. When they discover that the memories of their entire friendship are the price for returning home, Jo and Raissa must race to find a way to leave the island before they forget each other forever."
+    "overview": "While celebrating their last night together, high school graduates and best friends Jo and Raissa stumble upon a mysterious portal that transports them to the fantastical island of Nakali. When they discover that the memories of their entire friendship are the price for returning home, Jo and Raissa must race to find a way to leave the island before they forget each other forever.",
+    "director": "Januel Mercado, Joel Crawford"
   },
   {
     "id": "33",
@@ -365,7 +397,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
     "rating": 7.5,
-    "overview": "Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for something entirely unexpected: new Emotions! Joy, Sadness, Anger, Fear and Disgust, who’ve long been running a successful operation by all accounts, aren’t sure how to feel when Anxiety shows up. And it looks like she’s not alone."
+    "overview": "Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for something entirely unexpected: new Emotions! Joy, Sadness, Anger, Fear and Disgust, who’ve long been running a successful operation by all accounts, aren’t sure how to feel when Anxiety shows up. And it looks like she’s not alone.",
+    "director": "Kelsey Mann"
   },
   {
     "id": "34",
@@ -376,7 +409,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/ogwQOLbCfncjvBhFb5l0OmQH8KC.jpg",
     "rating": 7.0,
-    "overview": "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all."
+    "overview": "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all.",
+    "director": "Susanne Bier"
   },
   {
     "id": "35",
@@ -387,7 +421,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/pwUb3gdkSrlyMZWs0MFOQg3N5s7.jpg",
     "rating": 6.3,
-    "overview": "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits them for the next World Warrior Tournament: a brutal clash of fists, fate, and fury. But behind this battle royale lies a deadly conspiracy that forces them to face off against each other and the demons of their past. And if they don't, it's GAME OVER!"
+    "overview": "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits them for the next World Warrior Tournament: a brutal clash of fists, fate, and fury. But behind this battle royale lies a deadly conspiracy that forces them to face off against each other and the demons of their past. And if they don't, it's GAME OVER!",
+    "director": "Kitao Sakurai"
   },
   {
     "id": "36",
@@ -398,7 +433,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/6JU7E8Vv2M11egkctWVOScxWR75.jpg",
     "rating": 6.8,
-    "overview": "A family suddenly sealed inside their home must work together to survive against dwindling resources and the ominous threat keeping them trapped."
+    "overview": "A family suddenly sealed inside their home must work together to survive against dwindling resources and the ominous threat keeping them trapped.",
+    "director": "Louis Leterrier"
   },
   {
     "id": "37",
@@ -409,7 +445,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/7jK6NuxVg1XuEV7UdNa6KO03IgZ.jpg",
     "rating": 7.0,
-    "overview": "Frances Haugen, a young Facebook engineer, enlists the help of Jeff Horwitz, a Wall Street Journal reporter, to go on a dangerous journey that ends up blowing the whistle on the social network's most guarded secrets."
+    "overview": "Frances Haugen, a young Facebook engineer, enlists the help of Jeff Horwitz, a Wall Street Journal reporter, to go on a dangerous journey that ends up blowing the whistle on the social network's most guarded secrets.",
+    "director": "Aaron Sorkin"
   },
   {
     "id": "38",
@@ -420,7 +457,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
     "rating": 7.5,
-    "overview": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything."
+    "overview": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything.",
+    "director": "Alejandro G. Iñárritu"
   },
   {
     "id": "39",
@@ -431,7 +469,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
     "rating": 6.0,
-    "overview": "Young Bela forms a relationship with a sinister entity in her home that looks uncannily like her own mother, drawing her into a terrifying and increasingly dark world."
+    "overview": "Young Bela forms a relationship with a sinister entity in her home that looks uncannily like her own mother, drawing her into a terrifying and increasingly dark world.",
+    "director": "Rob Savage"
   },
   {
     "id": "40",
@@ -442,7 +481,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/8o6lkhL32xQJeB52IIG1us5BVey.jpg",
     "rating": 5.7,
-    "overview": "When Papa Smurf is mysteriously taken by evil wizards, Razamel and Gargamel, Smurfette leads the Smurfs on a mission into the real world to save him. With the help of new friends, the Smurfs must discover what defines their destiny to save the universe."
+    "overview": "When Papa Smurf is mysteriously taken by evil wizards, Razamel and Gargamel, Smurfette leads the Smurfs on a mission into the real world to save him. With the help of new friends, the Smurfs must discover what defines their destiny to save the universe.",
+    "director": "Chris Miller"
   },
   {
     "id": "41",
@@ -453,7 +493,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/50lPmjIpDs8gKfgK7fPIeKzpllh.jpg",
     "rating": 6.5,
-    "overview": "A triptych fable following a man without choice who tries to take control of his own life; a policeman who is alarmed that his wife who was missing-at-sea has returned and seems a different person; and a woman determined to find a specific someone with a special ability, who is destined to become a prodigious spiritual leader."
+    "overview": "A triptych fable following a man without choice who tries to take control of his own life; a policeman who is alarmed that his wife who was missing-at-sea has returned and seems a different person; and a woman determined to find a specific someone with a special ability, who is destined to become a prodigious spiritual leader.",
+    "director": "Yorgos Lanthimos"
   },
   {
     "id": "42",
@@ -464,7 +505,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/H6vke7zGiuLsz4v4RPeReb9rsv.jpg",
     "rating": 6.9,
-    "overview": "Tennis player turned coach Tashi has taken her husband, Art, and transformed him into a world-famous Major champion. To jolt him out of his recent losing streak, she signs him up for a \"Challenger\" event — close to the lowest level of pro tournament — where he finds himself standing across the net from his former best friend and Tashi's former boyfriend."
+    "overview": "Tennis player turned coach Tashi has taken her husband, Art, and transformed him into a world-famous Major champion. To jolt him out of his recent losing streak, she signs him up for a \"Challenger\" event — close to the lowest level of pro tournament — where he finds himself standing across the net from his former best friend and Tashi's former boyfriend.",
+    "director": "Luca Guadagnino"
   },
   {
     "id": "43",
@@ -475,7 +517,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/m5x8D0bZ3eKqIVWZ5y7TnZ2oTVg.jpg",
     "rating": 7.2,
-    "overview": "After the unexpected death of the Pope, Cardinal Lawrence is tasked with managing the covert and ancient ritual of electing a new one. Sequestered in the Vatican with the Catholic Church’s most powerful leaders until the process is complete, Lawrence finds himself at the center of a conspiracy that could lead to its downfall."
+    "overview": "After the unexpected death of the Pope, Cardinal Lawrence is tasked with managing the covert and ancient ritual of electing a new one. Sequestered in the Vatican with the Catholic Church’s most powerful leaders until the process is complete, Lawrence finds himself at the center of a conspiracy that could lead to its downfall.",
+    "director": "Edward Berger"
   },
   {
     "id": "44",
@@ -486,7 +529,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
     "rating": 8.4,
-    "overview": "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs."
+    "overview": "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
+    "director": "Dan Erickson"
   },
   {
     "id": "45",
@@ -497,7 +541,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/rpSo8z9alultGVTqQ3dkLEyU8xx.jpg",
     "rating": 7.9,
-    "overview": "A grifter in 1960s New York is hired to convince a wealthy man's son to return home from Italy and begins a life of deceit, fraud and murder."
+    "overview": "A grifter in 1960s New York is hired to convince a wealthy man's son to return home from Italy and begins a life of deceit, fraud and murder.",
+    "director": "Steven Zaillian"
   },
   {
     "id": "46",
@@ -508,7 +553,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
     "rating": 8.1,
-    "overview": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors to defend England from sinister forces."
+    "overview": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors to defend England from sinister forces.",
+    "director": "Adam Randall"
   },
   {
     "id": "47",
@@ -519,7 +565,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/eKfVzzEazSIjJMrw9ADa2x8ksLz.jpg",
     "rating": 8.2,
-    "overview": "Carmy, a young fine-dining chef, comes home to Chicago to run his family sandwich shop. As he fights to transform the shop and himself, he works alongside a rough-around-the-edges crew that ultimately reveal themselves as his chosen family."
+    "overview": "Carmy, a young fine-dining chef, comes home to Chicago to run his family sandwich shop. As he fights to transform the shop and himself, he works alongside a rough-around-the-edges crew that ultimately reveal themselves as his chosen family.",
+    "director": "Christopher Storer"
   },
   {
     "id": "48",
@@ -530,7 +577,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1WnzG1AgYT.jpg",
     "rating": 8.4,
-    "overview": "In Japan in the year 1600, at the dawn of a century-defining civil war, Lord Yoshii Toranaga is fighting for his life as his enemies on the Council of Regents unite against him, when a mysterious European ship is found marooned in a nearby fishing village."
+    "overview": "In Japan in the year 1600, at the dawn of a century-defining civil war, Lord Yoshii Toranaga is fighting for his life as his enemies on the Council of Regents unite against him, when a mysterious European ship is found marooned in a nearby fishing village.",
+    "director": "Rachel Kondo, Justin Marks"
   },
   {
     "id": "49",
@@ -541,7 +589,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg",
     "rating": 7.6,
-    "overview": "Brought back to life by an unorthodox scientist, a young woman runs off with a lawyer on a whirlwind adventure across the continents. Free from the prejudices of her times, she grows steadfast in her purpose to stand for equality and liberation."
+    "overview": "Brought back to life by an unorthodox scientist, a young woman runs off with a lawyer on a whirlwind adventure across the continents. Free from the prejudices of her times, she grows steadfast in her purpose to stand for equality and liberation.",
+    "director": "Yorgos Lanthimos"
   },
   {
     "id": "50",
@@ -552,7 +601,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/x45XteYF8kw1GvwHWgJ2Kizyfnq.jpg",
     "rating": 5.7,
-    "overview": "David Hare's account of a one-time French freedom fighter who gradually realizes that her post-war life is not meeting her expectations."
+    "overview": "David Hare's account of a one-time French freedom fighter who gradually realizes that her post-war life is not meeting her expectations.",
+    "director": "Fred Schepisi"
   },
   {
     "id": "51",
@@ -563,7 +613,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/7QPeVsr9rcFU9Gl90yg0gTOTpVv.jpg",
     "rating": 7.1,
-    "overview": "Eight very different couples deal with their love lives in various loosely interrelated tales all set during a frantic month before Christmas in London."
+    "overview": "Eight very different couples deal with their love lives in various loosely interrelated tales all set during a frantic month before Christmas in London.",
+    "director": "Richard Curtis"
   },
   {
     "id": "52",
@@ -574,7 +625,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/tbKSsFd4ImzUgbYolttkq4pmOPQ.jpg",
     "rating": 8.1,
-    "overview": "Marianne and Connell weave in and out of each other's lives in this exploration of sex, power and the desire to love and be loved."
+    "overview": "Marianne and Connell weave in and out of each other's lives in this exploration of sex, power and the desire to love and be loved.",
+    "director": "Ed Guiney"
   },
   {
     "id": "53",
@@ -585,7 +637,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/1ho0d4LNZw3Y0voeKmSvPSgJOJ2.jpg",
     "rating": 7.5,
-    "overview": "A woman is suspected of her husband's murder, and their blind son faces a moral dilemma as the sole witness."
+    "overview": "A woman is suspected of her husband's murder, and their blind son faces a moral dilemma as the sole witness.",
+    "director": "Justine Triet"
   },
   {
     "id": "54",
@@ -596,7 +649,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/cgXk2tNYhJZLXdBDO5DidAVzQ82.jpg",
     "rating": 7.1,
-    "overview": "A young sex worker from Brooklyn gets her chance at a Cinderella story when she meets and impulsively marries the son of an oligarch. Once the news reaches Russia, her fairytale is threatened as his parents set out to get the marriage annulled."
+    "overview": "A young sex worker from Brooklyn gets her chance at a Cinderella story when she meets and impulsively marries the son of an oligarch. Once the news reaches Russia, her fairytale is threatened as his parents set out to get the marriage annulled.",
+    "director": "Sean Baker"
   },
   {
     "id": "55",
@@ -607,7 +661,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/rrKH3VhHssGTCfPuaEQkxvEoElv.jpg",
     "rating": 7.2,
-    "overview": "Armed with only one word - Tenet - and fighting for the survival of the entire world, the Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time."
+    "overview": "Armed with only one word - Tenet - and fighting for the survival of the entire world, the Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time.",
+    "director": "Christopher Nolan"
   },
   {
     "id": "56",
@@ -618,7 +673,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/cVzvJsn2TUEXxRszs2IVFF36hSA.jpg",
     "rating": 7.1,
-    "overview": "Jacques, a young man with artistic aspirations, spends four nights wandering Paris with a young woman, whom he rescued from suicide."
+    "overview": "Jacques, a young man with artistic aspirations, spends four nights wandering Paris with a young woman, whom he rescued from suicide.",
+    "director": "Robert Bresson"
   },
   {
     "id": "57",
@@ -629,7 +685,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/iUAFECovwPA0cVV9bo4uNGLJSGL.jpg",
     "rating": 7.3,
-    "overview": "Beautiful young housewife Séverine Serizy cannot reconcile her masochistic fantasies with her everyday life alongside dutiful husband Pierre. When her lovestruck friend Henri mentions a secretive high-class brothel run by Madame Anais, Séverine begins to work there during the day under the name Belle de Jour. But when one of her clients grows possessive, she must try to go back to her normal life."
+    "overview": "Beautiful young housewife Séverine Serizy cannot reconcile her masochistic fantasies with her everyday life alongside dutiful husband Pierre. When her lovestruck friend Henri mentions a secretive high-class brothel run by Madame Anais, Séverine begins to work there during the day under the name Belle de Jour. But when one of her clients grows possessive, she must try to go back to her normal life.",
+    "director": "Luis Buñuel"
   },
   {
     "id": "58",
@@ -640,7 +697,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/eV6UL22Zlpsq5XybUupWh0rBOp0.jpg",
     "rating": 6.1,
-    "overview": "Starting from childhood attempts at illustration, the protagonist pursues his true obsession to art school. But as he learns how the art world really works, he finds that he must adapt his vision to the reality that confronts him."
+    "overview": "Starting from childhood attempts at illustration, the protagonist pursues his true obsession to art school. But as he learns how the art world really works, he finds that he must adapt his vision to the reality that confronts him.",
+    "director": "Terry Zwigoff"
   },
   {
     "id": "59",
@@ -651,7 +709,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/yEEEQoJQ1fGT11faLPBfHXkds9E.jpg",
     "rating": 6.5,
-    "overview": "Newly single, 35, and uninspired by his job, Jesse Fisher worries that his best days are behind him. But no matter how much he buries his head in a book, life keeps pulling Jesse back. When his favorite college professor invites him to campus to speak at his retirement dinner, Jesse jumps at the chance."
+    "overview": "Newly single, 35, and uninspired by his job, Jesse Fisher worries that his best days are behind him. But no matter how much he buries his head in a book, life keeps pulling Jesse back. When his favorite college professor invites him to campus to speak at his retirement dinner, Jesse jumps at the chance.",
+    "director": "Josh Radnor"
   },
   {
     "id": "60",
@@ -662,7 +721,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/uLUFI5sJIfWrBUWB2Y1dEuyvvVy.jpg",
     "rating": 7.0,
-    "overview": "Young lovers Sailor and Lula hit the road to start a new life together away from the wrath of Lula’s deranged, disapproving mother, who has hired a team of hitmen to cut the lovers’ surreal honeymoon short."
+    "overview": "Young lovers Sailor and Lula hit the road to start a new life together away from the wrath of Lula’s deranged, disapproving mother, who has hired a team of hitmen to cut the lovers’ surreal honeymoon short.",
+    "director": "David Lynch"
   },
   {
     "id": "61",
@@ -673,7 +733,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/cAWLz9kFv4xc6IsEXTj2DrcqD55.jpg",
     "rating": 6.9,
-    "overview": "Brandon, a thirty-something man living in New York, eludes intimacy with women but feeds his deepest desires with a compulsive addiction to sex. When his younger sister temporarily moves into his apartment, stirring up bitter memories of their shared painful past, Brandon's life, like his fragile mind, gets out of control."
+    "overview": "Brandon, a thirty-something man living in New York, eludes intimacy with women but feeds his deepest desires with a compulsive addiction to sex. When his younger sister temporarily moves into his apartment, stirring up bitter memories of their shared painful past, Brandon's life, like his fragile mind, gets out of control.",
+    "director": "Steve McQueen"
   },
   {
     "id": "62",
@@ -684,7 +745,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/m0dWCKMtZAlPERK7Wsq7DH2BS4M.jpg",
     "rating": 7.2,
-    "overview": "The setting is the east shore of the Caspian Sea (today's Turkmenistan) where the Red Army soldier Fyodor Sukhov has been fighting the Civil War in Russian Asia for a number of years. After being hospitalised and then demobbed, he sets off home to join his wife, only to be caught up in a desert fight between a Red Army cavalry unit and Basmachi guerrillas. The cavalry unit commander, Rahimov, \"convinces\" Sukhov to help, temporarily, with the protection of abandoned women of the Basmachi guerrilla leader Abdullah's harem. Leaving a young Red Army soldier, Petrukha, to assist Sukhov with the task, Rahimov and his cavalry unit set out to pursue fleeing Abdullah.Sukhov and women from Abdullah's harem return to a nearby shore town. Soon, looking for a seaway across the border, Abdullah and his gang come to the same town..."
+    "overview": "The setting is the east shore of the Caspian Sea (today's Turkmenistan) where the Red Army soldier Fyodor Sukhov has been fighting the Civil War in Russian Asia for a number of years. After being hospitalised and then demobbed, he sets off home to join his wife, only to be caught up in a desert fight between a Red Army cavalry unit and Basmachi guerrillas. The cavalry unit commander, Rahimov, \"convinces\" Sukhov to help, temporarily, with the protection of abandoned women of the Basmachi guerrilla leader Abdullah's harem. Leaving a young Red Army soldier, Petrukha, to assist Sukhov with the task, Rahimov and his cavalry unit set out to pursue fleeing Abdullah.Sukhov and women from Abdullah's harem return to a nearby shore town. Soon, looking for a seaway across the border, Abdullah and his gang come to the same town...",
+    "director": "Vladimir Motyl"
   },
   {
     "id": "63",
@@ -695,7 +757,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/itfb9DhJrUUyGFk63HDdmWenlzw.jpg",
     "rating": 6.1,
-    "overview": "Aging publisher Will Randall is at the end of his rope when a younger co-worker snatches his job out from under his nose. But after being bitten by a wolf, Will suddenly finds himself full of youthful vigor. As he struggles to regain his position, he becomes enthralled with Laura Alden, his former boss's daughter. And, as increasingly animal-like urges begin to overwhelm him, Randall worries that he may be turning into the creature that bit him."
+    "overview": "Aging publisher Will Randall is at the end of his rope when a younger co-worker snatches his job out from under his nose. But after being bitten by a wolf, Will suddenly finds himself full of youthful vigor. As he struggles to regain his position, he becomes enthralled with Laura Alden, his former boss's daughter. And, as increasingly animal-like urges begin to overwhelm him, Randall worries that he may be turning into the creature that bit him.",
+    "director": "Mike Nichols"
   },
   {
     "id": "64",
@@ -706,7 +769,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/5MwkWH9tYHv3mV9OdYTMR5qreIz.jpg",
     "rating": 8.1,
-    "overview": "Joel Barish, heartbroken that his girlfriend underwent a procedure to erase him from her memory, decides to do the same. However, as he watches his memories of her fade away, he realises that he still loves her, and may be too late to correct his mistake."
+    "overview": "Joel Barish, heartbroken that his girlfriend underwent a procedure to erase him from her memory, decides to do the same. However, as he watches his memories of her fade away, he realises that he still loves her, and may be too late to correct his mistake.",
+    "director": "Michel Gondry"
   },
   {
     "id": "65",
@@ -717,7 +781,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/y1oFNynXrIzlPUe4CXKMR2dpNep.jpg",
     "rating": 6.5,
-    "overview": "In 1943 Malmö, 15-year-old Stig is attracted to his teacher Viola, 22 years his senior, who, drawn to his youth and innocence, believes the lad is a God-sent relief from her miserable marriage to a drunken, unfaithful lout."
+    "overview": "In 1943 Malmö, 15-year-old Stig is attracted to his teacher Viola, 22 years his senior, who, drawn to his youth and innocence, believes the lad is a God-sent relief from her miserable marriage to a drunken, unfaithful lout.",
+    "director": "Bo Widerberg"
   },
   {
     "id": "66",
@@ -728,7 +793,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/j3xkIHvceNKl6Y3odzWD1pwML0d.jpg",
     "rating": 6.7,
-    "overview": "A New York suburban couple's marriage goes dangerously awry when the wife indulges in an adulterous fling."
+    "overview": "A New York suburban couple's marriage goes dangerously awry when the wife indulges in an adulterous fling.",
+    "director": "Adrian Lyne"
   },
   {
     "id": "67",
@@ -739,7 +805,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/9xckurqcoNkTYtjh5f3HvOZFMMP.jpg",
     "rating": 5.3,
-    "overview": "In Italy, three men fall in love with three women. First a young engaged lawyer has a fling, then the middle-aged married man has a fling, then a retired man falls in love with his friend's daughter."
+    "overview": "In Italy, three men fall in love with three women. First a young engaged lawyer has a fling, then the middle-aged married man has a fling, then a retired man falls in love with his friend's daughter.",
+    "director": "Giovanni Veronesi"
   },
   {
     "id": "68",
@@ -750,7 +817,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/2Jc60w8ZemDMYqyJUStcQKy6syi.jpg",
     "rating": 6.9,
-    "overview": "Struggling with a financial crisis, a good-looking widow decides to put herself up for grabs. However, going through with it becomes almost impossible with a new love and the legal system thrown into the mix."
+    "overview": "Struggling with a financial crisis, a good-looking widow decides to put herself up for grabs. However, going through with it becomes almost impossible with a new love and the legal system thrown into the mix.",
+    "director": "Francesco Laudadio"
   },
   {
     "id": "69",
@@ -761,7 +829,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/8EWKKGnAQPdTXhr2aRde1aLwPQn.jpg",
     "rating": 6.8,
-    "overview": "Max is a former playboy who has decided to settle down by marrying his current love, Muriel. However, when Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship."
+    "overview": "Max is a former playboy who has decided to settle down by marrying his current love, Muriel. However, when Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship.",
+    "director": "Gilles Mimouni"
   },
   {
     "id": "70",
@@ -772,7 +841,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/oNnvAJkPWH5enUBexmmbrxxebxR.jpg",
     "rating": 7.2,
-    "overview": "In 1957 Trieste, a few months before the general ban on brothels, inexperienced country girl Mimma becomes Paprika to finance her useless boyfriend as a prostitute. Amid the hustle and bustle of Rome, Paprika drifts from one brothel to another as she learns the ropes and works her way up one client at a time. However, as Paprika embarks on a stormy journey of self-discovery and sexual liberation, the sense that something is missing haunts her. Is Paprika meant to experience a passionate romance and solve the great mystery of true love?"
+    "overview": "In 1957 Trieste, a few months before the general ban on brothels, inexperienced country girl Mimma becomes Paprika to finance her useless boyfriend as a prostitute. Amid the hustle and bustle of Rome, Paprika drifts from one brothel to another as she learns the ropes and works her way up one client at a time. However, as Paprika embarks on a stormy journey of self-discovery and sexual liberation, the sense that something is missing haunts her. Is Paprika meant to experience a passionate romance and solve the great mystery of true love?",
+    "director": "Tinto Brass"
   },
   {
     "id": "71",
@@ -783,7 +853,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/soBvtCR33Gv1j6gXwXOIc3JTlNc.jpg",
     "rating": 7.0,
-    "overview": "In Tuscany to promote his latest book, a middle-aged English writer meets a French woman who leads him to the village of Lucignano."
+    "overview": "In Tuscany to promote his latest book, a middle-aged English writer meets a French woman who leads him to the village of Lucignano.",
+    "director": "Abbas Kiarostami"
   },
   {
     "id": "72",
@@ -794,7 +865,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/vclShucpUmPhdAOmKgf3B3Z4POD.jpg",
     "rating": 6.3,
-    "overview": "A group of families on a tropical holiday discover that the secluded beach where they are staying is somehow causing them to age rapidly – reducing their entire lives into a single day."
+    "overview": "A group of families on a tropical holiday discover that the secluded beach where they are staying is somehow causing them to age rapidly – reducing their entire lives into a single day.",
+    "director": "M. Night Shyamalan"
   },
   {
     "id": "73",
@@ -805,7 +877,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/2VUmvqsHb6cEtdfscEA6fqqVzLg.jpg",
     "rating": 7.3,
-    "overview": "Taking place during the events of John Wick: Chapter 3 – Parabellum, Eve Macarro begins her training in the assassin traditions of the Ruska Roma."
+    "overview": "Taking place during the events of John Wick: Chapter 3 – Parabellum, Eve Macarro begins her training in the assassin traditions of the Ruska Roma.",
+    "director": "Len Wiseman"
   },
   {
     "id": "74",
@@ -816,7 +889,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/xejUFnoAVxzvU95o2jlzG2USmY.jpg",
     "rating": 7.1,
-    "overview": "A strong-willed peasant girl is sent by her father to the estate of some local aristocrats to capitalize on a rumour that their families are from the same line. This fateful visit commences an epic narrative of sex, class, betrayal, and revenge."
+    "overview": "A strong-willed peasant girl is sent by her father to the estate of some local aristocrats to capitalize on a rumour that their families are from the same line. This fateful visit commences an epic narrative of sex, class, betrayal, and revenge.",
+    "director": "Roman Polanski"
   },
   {
     "id": "75",
@@ -827,7 +901,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/2JRyCKaRKyJAVpsIHeLvPw5nHmw.jpg",
     "rating": 7.7,
-    "overview": "A stage director and an actress struggle through a grueling, coast-to-coast divorce that pushes them to their personal extremes."
+    "overview": "A stage director and an actress struggle through a grueling, coast-to-coast divorce that pushes them to their personal extremes.",
+    "director": "Noah Baumbach"
   },
   {
     "id": "76",
@@ -838,7 +913,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/qgyp48naq0W7j4NbOttFi91DlYW.jpg",
     "rating": 5.9,
-    "overview": "On a trip to the beach, a teenage girl named Tobe meets a charismatic stranger named Harlan, who dresses like a cowboy and claims to be a former ranch hand. The pair feel an instant attraction and begin a relationship, but her father, a lawman, is suspicious of her lover."
+    "overview": "On a trip to the beach, a teenage girl named Tobe meets a charismatic stranger named Harlan, who dresses like a cowboy and claims to be a former ranch hand. The pair feel an instant attraction and begin a relationship, but her father, a lawman, is suspicious of her lover.",
+    "director": "David Jacobson"
   },
   {
     "id": "77",
@@ -849,7 +925,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/8AwVTcgpTnmeOs4TdTWqcFDXEsA.jpg",
     "rating": 7.2,
-    "overview": "Shallow, rich and socially successful Cher is at the top of her Beverly Hills high school's pecking scale. Seeing herself as a matchmaker, Cher first coaxes two teachers into dating each other. Emboldened by her success, she decides to give hopelessly klutzy new student Tai a makeover. When Tai becomes more popular than she is, Cher realizes that her disapproving ex-stepbrother was right about how misguided she was -- and falls for him."
+    "overview": "Shallow, rich and socially successful Cher is at the top of her Beverly Hills high school's pecking scale. Seeing herself as a matchmaker, Cher first coaxes two teachers into dating each other. Emboldened by her success, she decides to give hopelessly klutzy new student Tai a makeover. When Tai becomes more popular than she is, Cher realizes that her disapproving ex-stepbrother was right about how misguided she was -- and falls for him.",
+    "director": "Amy Heckerling"
   },
   {
     "id": "78",
@@ -860,7 +937,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/hrj9VsInHnqSDBhEc2FvY0qd79F.jpg",
     "rating": 7.0,
-    "overview": "Single dad Richard meets Christine, a starving artist who moonlights as a cabbie. They awkwardly attempt to start a romance, but Richard’s divorce has left him emotionally damaged. Meanwhile, Richard’s sons—one a teenager, the other 6-years-old—take part in clumsy experiments with the opposite sex."
+    "overview": "Single dad Richard meets Christine, a starving artist who moonlights as a cabbie. They awkwardly attempt to start a romance, but Richard’s divorce has left him emotionally damaged. Meanwhile, Richard’s sons—one a teenager, the other 6-years-old—take part in clumsy experiments with the opposite sex.",
+    "director": "Miranda July"
   },
   {
     "id": "79",
@@ -871,7 +949,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/hH1Bla0W4YIn9sdd9NwODzDCcE4.jpg",
     "rating": 5.5,
-    "overview": "Rattled by sudden unemployment, a Manhattan couple surveys alternative living options, ultimately deciding to experiment with living on a rural commune where free love rules."
+    "overview": "Rattled by sudden unemployment, a Manhattan couple surveys alternative living options, ultimately deciding to experiment with living on a rural commune where free love rules.",
+    "director": "David Wain"
   },
   {
     "id": "80",
@@ -882,7 +961,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/x7A59t6ySylr1L7aubOQEA480vM.jpg",
     "rating": 7.8,
-    "overview": "Blonde Betty Elms has only just arrived in Hollywood to become a movie star when she meets an enigmatic brunette with amnesia. Meanwhile, as the two set off to solve the second woman's identity, filmmaker Adam Kesher runs into ominous trouble while casting his latest project."
+    "overview": "Blonde Betty Elms has only just arrived in Hollywood to become a movie star when she meets an enigmatic brunette with amnesia. Meanwhile, as the two set off to solve the second woman's identity, filmmaker Adam Kesher runs into ominous trouble while casting his latest project.",
+    "director": "David Lynch"
   },
   {
     "id": "81",
@@ -893,7 +973,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/qZomlHsaALUtkFeMDwdYmwS2Pbo.jpg",
     "rating": 7.8,
-    "overview": "When veteran anchorman Howard Beale is forced to retire his 25-year post because of his age, he announces to viewers that he will kill himself during his farewell broadcast. Network executives rethink their decision when his fanatical tirade results in a spike in ratings."
+    "overview": "When veteran anchorman Howard Beale is forced to retire his 25-year post because of his age, he announces to viewers that he will kill himself during his farewell broadcast. Network executives rethink their decision when his fanatical tirade results in a spike in ratings.",
+    "director": "Sidney Lumet"
   },
   {
     "id": "82",
@@ -904,7 +985,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/74hLDKjD5aGYOotO6esUVaeISa2.jpg",
     "rating": 8.4,
-    "overview": "A touching story of an Italian book seller of Jewish ancestry who lives in his own little fairy tale. His creative and happy life would come to an abrupt halt when his entire family is deported to a concentration camp during World War II. While locked up he tries to convince his son that the whole thing is just a game."
+    "overview": "A touching story of an Italian book seller of Jewish ancestry who lives in his own little fairy tale. His creative and happy life would come to an abrupt halt when his entire family is deported to a concentration camp during World War II. While locked up he tries to convince his son that the whole thing is just a game.",
+    "director": "Roberto Benigni"
   },
   {
     "id": "83",
@@ -915,7 +997,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/2koX1xLkpTQM4IZebYvKysFW1Nh.jpg",
     "rating": 8.4,
-    "overview": "Six young people from New York City, on their own and struggling to survive in the real world, find the companionship, comfort and support they get from each other to be the perfect antidote to the pressures of life."
+    "overview": "Six young people from New York City, on their own and struggling to survive in the real world, find the companionship, comfort and support they get from each other to be the perfect antidote to the pressures of life.",
+    "director": "Marta Kauffman, David Crane"
   },
   {
     "id": "84",
@@ -926,7 +1009,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",
     "rating": 7.3,
-    "overview": "After finding themselves ensnared in a death trap, seven disillusioned castoffs must embark on a dangerous mission that will force them to confront the darkest corners of their pasts."
+    "overview": "After finding themselves ensnared in a death trap, seven disillusioned castoffs must embark on a dangerous mission that will force them to confront the darkest corners of their pasts.",
+    "director": "Jake Schreier"
   },
   {
     "id": "85",
@@ -937,7 +1021,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/geCRueV3ElhRTr0xtJuEWJt6dJ1.jpg",
     "rating": 8.7,
-    "overview": "They say whatever doesn’t kill you makes you stronger, but that’s not the case for the world’s weakest hunter Sung Jinwoo. After being brutally slaughtered by monsters in a high-ranking dungeon, Jinwoo came back with the System, a program only he could see, that’s leveling him up in every way. Now, he’s inspired to discover the secrets behind his powers and the dungeon that spawned them."
+    "overview": "They say whatever doesn’t kill you makes you stronger, but that’s not the case for the world’s weakest hunter Sung Jinwoo. After being brutally slaughtered by monsters in a high-ranking dungeon, Jinwoo came back with the System, a program only he could see, that’s leveling him up in every way. Now, he’s inspired to discover the secrets behind his powers and the dungeon that spawned them.",
+    "director": "Asa Suehira"
   },
   {
     "id": "86",
@@ -948,7 +1033,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/t0X9TVBkqJlTsdWZCTADsQqg4gC.jpg",
     "rating": 7.5,
-    "overview": "A 50-year-old divorcee searches for sex and love whilst juggling caring for her ailing parents and parenting her should-be grown up son."
+    "overview": "A 50-year-old divorcee searches for sex and love whilst juggling caring for her ailing parents and parenting her should-be grown up son.",
+    "director": "Sharon Horgan"
   },
   {
     "id": "87",
@@ -959,7 +1045,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/fi1b6U1kp73xheECzqwzMn8u3mX.jpg",
     "rating": 8.7,
-    "overview": "Fionna and Cake – with the help of the former Ice King, Simon Petrikov - embark on a multiverse-hopping adventure and journey of self-discovery. All the while a powerful new antagonist determined to track them down and erase them from existence, lurks in the shadows."
+    "overview": "Fionna and Cake – with the help of the former Ice King, Simon Petrikov - embark on a multiverse-hopping adventure and journey of self-discovery. All the while a powerful new antagonist determined to track them down and erase them from existence, lurks in the shadows.",
+    "director": "Adam Muto"
   },
   {
     "id": "88",
@@ -970,7 +1057,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/du9zczcShf4WIuljDR0Aib7AYtX.jpg",
     "rating": 7.5,
-    "overview": "A woman’s body disappears mysteriously from the morgue without a trace. Police inspector Jaime Peña investigates the strange occurrence with the help of Álex Ulloa, the widower of the missing woman."
+    "overview": "A woman’s body disappears mysteriously from the morgue without a trace. Police inspector Jaime Peña investigates the strange occurrence with the help of Álex Ulloa, the widower of the missing woman.",
+    "director": "Oriol Paulo"
   },
   {
     "id": "89",
@@ -981,7 +1069,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/cIWQzIoWOvx0piZM0UpiHMhzHWW.jpg",
     "rating": 7.0,
-    "overview": "A phobic con artist and his protege are on the verge of pulling off a lucrative swindle when the con artist's teenage daughter arrives unexpectedly."
+    "overview": "A phobic con artist and his protege are on the verge of pulling off a lucrative swindle when the con artist's teenage daughter arrives unexpectedly.",
+    "director": "Ridley Scott"
   },
   {
     "id": "90",
@@ -992,7 +1081,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/mG334OlDVJpD8gMfTCM2Mpp0gQH.jpg",
     "rating": 6.8,
-    "overview": "Jordan Turner is an experienced 911 operator but when she makes an error in judgment and a call ends badly, Jordan is rattled and unsure if she can continue. But when teenager Casey Welson is abducted in the back of a man's car and calls 911, Jordan is the one called upon to use all of her experience, insights and quick thinking to help Casey escape, and not just to save her, but to make sure the man is brought to justice."
+    "overview": "Jordan Turner is an experienced 911 operator but when she makes an error in judgment and a call ends badly, Jordan is rattled and unsure if she can continue. But when teenager Casey Welson is abducted in the back of a man's car and calls 911, Jordan is the one called upon to use all of her experience, insights and quick thinking to help Casey escape, and not just to save her, but to make sure the man is brought to justice.",
+    "director": "Brad Anderson"
   },
   {
     "id": "91",
@@ -1003,7 +1093,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/gCVOQzV7Z556WnJFNeX7y8BFhyW.jpg",
     "rating": 6.5,
-    "overview": "Two lifelong friends head up to an isolated Scottish Highlands village for a weekend hunting trip that descends into a never-ending nightmare as they attempt to cover up a horrific hunting accident."
+    "overview": "Two lifelong friends head up to an isolated Scottish Highlands village for a weekend hunting trip that descends into a never-ending nightmare as they attempt to cover up a horrific hunting accident.",
+    "director": "Matt Palmer"
   },
   {
     "id": "92",
@@ -1014,7 +1105,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/kH3qLP8pn68Xq5XwvmPkCyaAU7W.jpg",
     "rating": 6.7,
-    "overview": "Simon and Robyn are a young married couple whose life is going as planned until a chance run-in with Simon's high school acquaintance sends their world into a tailspin."
+    "overview": "Simon and Robyn are a young married couple whose life is going as planned until a chance run-in with Simon's high school acquaintance sends their world into a tailspin.",
+    "director": "Joel Edgerton"
   },
   {
     "id": "93",
@@ -1025,7 +1117,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/kw6YQudA0TMcNmGUGy5XIw7zbnV.jpg",
     "rating": 6.9,
-    "overview": "In a future where a failed global-warming experiment kills off most life on the planet, a class system evolves aboard the Snowpiercer; a train that travels around the globe via a perpetual-motion engine."
+    "overview": "In a future where a failed global-warming experiment kills off most life on the planet, a class system evolves aboard the Snowpiercer; a train that travels around the globe via a perpetual-motion engine.",
+    "director": "Bong Joon Ho"
   },
   {
     "id": "94",
@@ -1036,7 +1129,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/bRYLt8fV82tdVoDppSFTZIcJiLN.jpg",
     "rating": 8.1,
-    "overview": "After seven months have passed without a culprit in her daughter's murder case, Mildred Hayes makes a bold move, painting three signs leading into her town with a controversial message directed at Bill Willoughby, the town's revered chief of police. When his second-in-command Officer Jason Dixon, an immature mother's boy with a penchant for violence, gets involved, the battle between Mildred and Ebbing's law enforcement is only exacerbated."
+    "overview": "After seven months have passed without a culprit in her daughter's murder case, Mildred Hayes makes a bold move, painting three signs leading into her town with a controversial message directed at Bill Willoughby, the town's revered chief of police. When his second-in-command Officer Jason Dixon, an immature mother's boy with a penchant for violence, gets involved, the battle between Mildred and Ebbing's law enforcement is only exacerbated.",
+    "director": "Martin McDonagh"
   },
   {
     "id": "95",
@@ -1047,7 +1141,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg",
     "rating": 7.9,
-    "overview": "Mia, an aspiring actress, serves lattes to movie stars in between auditions and Sebastian, a jazz musician, scrapes by playing cocktail party gigs in dingy bars, but as success mounts they are faced with decisions that begin to fray the fragile fabric of their love affair, and the dreams they worked so hard to maintain in each other threaten to rip them apart."
+    "overview": "Mia, an aspiring actress, serves lattes to movie stars in between auditions and Sebastian, a jazz musician, scrapes by playing cocktail party gigs in dingy bars, but as success mounts they are faced with decisions that begin to fray the fragile fabric of their love affair, and the dreams they worked so hard to maintain in each other threaten to rip them apart.",
+    "director": "Damien Chazelle"
   },
   {
     "id": "96",
@@ -1058,7 +1153,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/sh7Rg8Er3tFcN9BpKIPOMvALgZd.jpg",
     "rating": 6.8,
-    "overview": "In the near future, a group of war journalists attempt to survive while reporting the truth as the United States stands on the brink of civil war."
+    "overview": "In the near future, a group of war journalists attempt to survive while reporting the truth as the United States stands on the brink of civil war.",
+    "director": "Alex Garland"
   },
   {
     "id": "97",
@@ -1069,7 +1165,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/w1qReOE0sSv17QmDFywtxueLfBU.jpg",
     "rating": 6.2,
-    "overview": "In late-90s suburbia, a lonely teenager meets a girl at school who introduces him to a mysterious late-night T.V. show — a vision of a supernatural world pulsing beneath their own. As time goes on, however, questions begin to arise about why the show sometimes seems more real than their own lives. In the pale glow of the television, their view of reality begins to crack."
+    "overview": "In late-90s suburbia, a lonely teenager meets a girl at school who introduces him to a mysterious late-night T.V. show — a vision of a supernatural world pulsing beneath their own. As time goes on, however, questions begin to arise about why the show sometimes seems more real than their own lives. In the pale glow of the television, their view of reality begins to crack.",
+    "director": "Jane Schoenbrun"
   },
   {
     "id": "98",
@@ -1080,7 +1177,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/vOWcqC4oDQws1doDWLO7d3dh5qc.jpg",
     "rating": 8.4,
-    "overview": "With the city in peril following the seawall's collapse, Oswald \"Oz\" Cobb seeks to fill the power vacuum left by the death of Carmine Falcone and finally give his mother Francis the life he's always promised. But first, Oz must confront his enemies and his own demoralizing reputation as \"the Penguin.\""
+    "overview": "With the city in peril following the seawall's collapse, Oswald \"Oz\" Cobb seeks to fill the power vacuum left by the death of Carmine Falcone and finally give his mother Francis the life he's always promised. But first, Oz must confront his enemies and his own demoralizing reputation as \"the Penguin.\"",
+    "director": "Lauren LeFranc"
   },
   {
     "id": "99",
@@ -1091,7 +1189,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg",
     "rating": 7.8,
-    "overview": "Jason Dessen is abducted into an alternate version of his life. To get back to his real family, he embarks on a harrowing journey to save them from the most terrifying foe imaginable: himself."
+    "overview": "Jason Dessen is abducted into an alternate version of his life. To get back to his real family, he embarks on a harrowing journey to save them from the most terrifying foe imaginable: himself.",
+    "director": "Blake Crouch"
   },
   {
     "id": "100",
@@ -1102,7 +1201,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/iADOJ8Zymht2JPMoy3R7xceZprc.jpg",
     "rating": 7.4,
-    "overview": "As the world falls, young Furiosa is snatched from the Green Place of Many Mothers into the hands of a great biker horde led by the warlord Dementus. Sweeping through the wasteland, they encounter the citadel presided over by Immortan Joe. The two tyrants wage war for dominance, and Furiosa must survive many trials as she puts together the means to find her way home."
+    "overview": "As the world falls, young Furiosa is snatched from the Green Place of Many Mothers into the hands of a great biker horde led by the warlord Dementus. Sweeping through the wasteland, they encounter the citadel presided over by Immortan Joe. The two tyrants wage war for dominance, and Furiosa must survive many trials as she puts together the means to find her way home.",
+    "director": "George Miller"
   },
   {
     "id": "101",
@@ -1113,7 +1213,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
     "rating": 8.0,
-    "overview": "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II."
+    "overview": "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II.",
+    "director": "Christopher Nolan"
   },
   {
     "id": "102",
@@ -1124,7 +1225,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/ve72VxNqjGM69Uky4WTo2bK6rfq.jpg",
     "rating": 8.0,
-    "overview": "Humanity finds a mysterious object buried beneath the lunar surface and sets off to find its origins with the help of HAL 9000, the world's most advanced super computer."
+    "overview": "Humanity finds a mysterious object buried beneath the lunar surface and sets off to find its origins with the help of HAL 9000, the world's most advanced super computer.",
+    "director": "Stanley Kubrick"
   },
   {
     "id": "103",
@@ -1135,7 +1237,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
     "rating": 7.7,
-    "overview": "After decades apart, childhood friends Nora and Hae Sung are reunited in New York for one fateful weekend as they confront notions of destiny, love, and the choices that make a life."
+    "overview": "After decades apart, childhood friends Nora and Hae Sung are reunited in New York for one fateful weekend as they confront notions of destiny, love, and the choices that make a life.",
+    "director": "Celine Song"
   },
   {
     "id": "104",
@@ -1146,7 +1249,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/1NxGNQchGBTHXJ6RShLY1IlZqWn.jpg",
     "rating": 7.4,
-    "overview": "The chronicles of four years in the life of Julie, a young woman who navigates the troubled waters of her love life and struggles to find her career path, leading her to take a realistic look at who she really is."
+    "overview": "The chronicles of four years in the life of Julie, a young woman who navigates the troubled waters of her love life and struggles to find her career path, leading her to take a realistic look at who she really is.",
+    "director": "Joachim Trier"
   },
   {
     "id": "105",
@@ -1157,7 +1261,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/kOVEVeg59E0wsnXmF9nrh6OmWII.jpg",
     "rating": 6.7,
-    "overview": "Rey develops her newly discovered abilities with the guidance of Luke Skywalker, who is unsettled by the strength of her powers. Meanwhile, the Resistance prepares to do battle with the First Order."
+    "overview": "Rey develops her newly discovered abilities with the guidance of Luke Skywalker, who is unsettled by the strength of her powers. Meanwhile, the Resistance prepares to do battle with the First Order.",
+    "director": "Luca Guadagnino"
   },
   {
     "id": "106",
@@ -1168,7 +1273,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/hgoWjp9Sh0MI97eAMZCnIoVfgvq.jpg",
     "rating": 7.3,
-    "overview": "In 1950s London, a renowned dressmaker's meticulous lifestyle begins drastically changing as his relationship with his young muse intensifies."
+    "overview": "In 1950s London, a renowned dressmaker's meticulous lifestyle begins drastically changing as his relationship with his young muse intensifies.",
+    "director": "Paul Thomas Anderson"
   },
   {
     "id": "107",
@@ -1179,7 +1285,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/55wmcXJIDYITr7JDijJTdvwSaAv.jpg",
     "rating": 6.1,
-    "overview": "A seductive stranger prowls the streets of Glasgow in search of prey: unsuspecting men who fall under her spell."
+    "overview": "A seductive stranger prowls the streets of Glasgow in search of prey: unsuspecting men who fall under her spell.",
+    "director": "Jonathan Glazer"
   },
   {
     "id": "108",
@@ -1190,7 +1297,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/2LquGwEhbg3soxSCs9VNyh5VJd9.jpg",
     "rating": 8.1,
-    "overview": "On an isolated island in Brittany at the end of the eighteenth century, a female painter is obliged to paint a wedding portrait of a young woman."
+    "overview": "On an isolated island in Brittany at the end of the eighteenth century, a female painter is obliged to paint a wedding portrait of a young woman.",
+    "director": "Céline Sciamma"
   },
   {
     "id": "109",
@@ -1201,7 +1309,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/zI8KZ4EdLUymWKX1YEkpZ0gtPUa.jpg",
     "rating": 7.3,
-    "overview": "From a mountain peak in South Korea, a man plummets to his death. Did he jump, or was he pushed? When detective Hae-joon arrives on the scene, he begins to suspect the dead man’s wife Seo-rae. But as he digs deeper into the investigation, he finds himself trapped in a web of deception and desire."
+    "overview": "From a mountain peak in South Korea, a man plummets to his death. Did he jump, or was he pushed? When detective Hae-joon arrives on the scene, he begins to suspect the dead man’s wife Seo-rae. But as he digs deeper into the investigation, he finds himself trapped in a web of deception and desire.",
+    "director": "Park Chan-wook"
   },
   {
     "id": "110",
@@ -1212,7 +1321,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/dLlH4aNHdnmf62umnInL8xPlPzw.jpg",
     "rating": 8.2,
-    "overview": "1930s Korea, in the period of Japanese occupation, a new girl, Sook-hee, is hired as a handmaiden to a Japanese heiress, Hideko, who lives a secluded life on a large countryside estate with her domineering Uncle Kouzuki. But the maid has a secret. She is a pickpocket recruited by a swindler posing as a Japanese Count to help him seduce the Lady to steal her fortune."
+    "overview": "1930s Korea, in the period of Japanese occupation, a new girl, Sook-hee, is hired as a handmaiden to a Japanese heiress, Hideko, who lives a secluded life on a large countryside estate with her domineering Uncle Kouzuki. But the maid has a secret. She is a pickpocket recruited by a swindler posing as a Japanese Count to help him seduce the Lady to steal her fortune.",
+    "director": "Park Chan-wook"
   },
   {
     "id": "111",
@@ -1223,7 +1333,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/qLnfEmPrDjJfPyyddLJPkXmshkp.jpg",
     "rating": 7.4,
-    "overview": "The tender, heartbreaking story of a young man’s struggle to find himself, told across three defining chapters in his life as he experiences the ecstasy, pain, and beauty of falling in love, while grappling with his own sexuality."
+    "overview": "The tender, heartbreaking story of a young man’s struggle to find himself, told across three defining chapters in his life as he experiences the ecstasy, pain, and beauty of falling in love, while grappling with his own sexuality.",
+    "director": "Barry Jenkins"
   },
   {
     "id": "112",
@@ -1234,7 +1345,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/eCOtqtfvn7mxGl6nfmq4b1exJRc.jpg",
     "rating": 7.8,
-    "overview": "In the not so distant future, Theodore, a lonely writer, purchases a newly developed operating system designed to meet the user's every need. To Theodore's surprise, a romantic relationship develops between him and his operating system. This unconventional love story blends science fiction and romance in a sweet tale that explores the nature of love and the ways that technology isolates and connects us all."
+    "overview": "In the not so distant future, Theodore, a lonely writer, purchases a newly developed operating system designed to meet the user's every need. To Theodore's surprise, a romantic relationship develops between him and his operating system. This unconventional love story blends science fiction and romance in a sweet tale that explores the nature of love and the ways that technology isolates and connects us all.",
+    "director": "Spike Jonze"
   },
   {
     "id": "113",
@@ -1245,7 +1357,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/3jCLmYDIIiSMPujbwygNpqdpM8N.jpg",
     "rating": 7.4,
-    "overview": "Two lost souls visiting Tokyo -- the young, neglected wife of a photographer and a washed-up movie star shooting a TV commercial -- find an odd solace and pensive freedom to be real in each other's company, away from their lives in America."
+    "overview": "Two lost souls visiting Tokyo -- the young, neglected wife of a photographer and a washed-up movie star shooting a TV commercial -- find an odd solace and pensive freedom to be real in each other's company, away from their lives in America.",
+    "director": "Sofia Coppola"
   },
   {
     "id": "114",
@@ -1256,7 +1369,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/nSxDa3M9aMvGVLoItzWTepQ5h5d.jpg",
     "rating": 7.9,
-    "overview": "At a tiny Parisian café, the adorable yet painfully shy Amélie accidentally discovers a gift for helping others. Soon Amelie is spending her days as a matchmaker, guardian angel, and all-around do-gooder. But when she bumps into a handsome stranger, will she find the courage to become the star of her very own love story?"
+    "overview": "At a tiny Parisian café, the adorable yet painfully shy Amélie accidentally discovers a gift for helping others. Soon Amelie is spending her days as a matchmaker, guardian angel, and all-around do-gooder. But when she bumps into a handsome stranger, will she find the courage to become the star of her very own love story?",
+    "director": "Jean-Pierre Jeunet"
   },
   {
     "id": "115",
@@ -1267,7 +1381,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/43I9DcNoCzpyzK8JCkJYpHqHqGG.jpg",
     "rating": 8.0,
-    "overview": "Two melancholic Hong Kong policemen fall in love: one with a mysterious underworld figure, the other with a beautiful and ethereal server at a late-night restaurant."
+    "overview": "Two melancholic Hong Kong policemen fall in love: one with a mysterious underworld figure, the other with a beautiful and ethereal server at a late-night restaurant.",
+    "director": "Wong Kar-wai"
   },
   {
     "id": "116",
@@ -1278,7 +1393,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/8BgGbbWiLNhPtkMkN0gGTnbtvBv.jpg",
     "rating": 8.1,
-    "overview": "In 1960s Hong Kong, two neighbors form an intimate bond after making a discovery about their spouses in this visually stunning tale of unrequited love."
+    "overview": "In 1960s Hong Kong, two neighbors form an intimate bond after making a discovery about their spouses in this visually stunning tale of unrequited love.",
+    "director": "Wong Kar-wai"
   },
   {
     "id": "117",
@@ -1289,7 +1405,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/kf1Jb1c2JAOqjuzA3H4oDM263uB.jpg",
     "rating": 8.0,
-    "overview": "An unexpected meeting on a train leads two travelers to spend an evening wandering through Vienna. As the night unfolds, they share stories and conversations about life and love, exploring new ideas while a quiet intimacy grows between them, knowing it may be their only night together."
+    "overview": "An unexpected meeting on a train leads two travelers to spend an evening wandering through Vienna. As the night unfolds, they share stories and conversations about life and love, exploring new ideas while a quiet intimacy grows between them, knowing it may be their only night together.",
+    "director": "Richard Linklater"
   },
   {
     "id": "118",
@@ -1300,7 +1417,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/qbGKJmNUroDz75kh5Oafoall89e.jpg",
     "rating": 7.5,
-    "overview": "It has been nine years since we last met Jesse and Celine, the French-American couple who once met on a train in Vienna. They now live in Paris with twin daughters but have spent a summer in Greece at the invitation of an author colleague of Jesse's. When the vacation is over and Jesse must send his teenage son off to the States, he begins to question his life decisions, and his relationship with Celine is at risk."
+    "overview": "It has been nine years since we last met Jesse and Celine, the French-American couple who once met on a train in Vienna. They now live in Paris with twin daughters but have spent a summer in Greece at the invitation of an author colleague of Jesse's. When the vacation is over and Jesse must send his teenage son off to the States, he begins to question his life decisions, and his relationship with Celine is at risk.",
+    "director": "Abdellatif Kechiche"
   },
   {
     "id": "119",
@@ -1311,7 +1429,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/evKz85EKouVbIr51zy5fOtpNRPg.jpg",
     "rating": 7.7,
-    "overview": "Sophie reflects on the shared joy and private melancholy of a holiday she took with her father twenty years earlier. Memories fill the gaps between camcorder footages as she tries to reconcile the father she knew with the troubled man she didn't."
+    "overview": "Sophie reflects on the shared joy and private melancholy of a holiday she took with her father twenty years earlier. Memories fill the gaps between camcorder footages as she tries to reconcile the father she knew with the troubled man she didn't.",
+    "director": "Charlotte Wells"
   },
   {
     "id": "120",
@@ -1322,7 +1441,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/602vevIURmpDfzbnv5Ubi6wIkQm.jpg",
     "rating": 7.6,
-    "overview": "Driver is a skilled Hollywood stuntman who moonlights as a getaway driver for criminals. Though he projects an icy exterior, lately he's been warming up to a pretty neighbor named Irene and her young son, Benicio. When Irene's husband gets out of jail, he enlists Driver's help in a million-dollar heist. The job goes horribly wrong, and Driver must risk his life to protect Irene and Benicio from the vengeful masterminds behind the robbery."
+    "overview": "Driver is a skilled Hollywood stuntman who moonlights as a getaway driver for criminals. Though he projects an icy exterior, lately he's been warming up to a pretty neighbor named Irene and her young son, Benicio. When Irene's husband gets out of jail, he enlists Driver's help in a million-dollar heist. The job goes horribly wrong, and Driver must risk his life to protect Irene and Benicio from the vengeful masterminds behind the robbery.",
+    "director": "Nicolas Winding Refn"
   },
   {
     "id": "121",
@@ -1333,7 +1453,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/7Y9ILV1unpW9mLpGcqyGQU72LUy.jpg",
     "rating": 7.0,
-    "overview": "In a dystopian near future, single people, according to the laws of The City, are taken to The Hotel, where they are obliged to find a romantic partner in forty-five days or are transformed into animals and sent off into The Woods."
+    "overview": "In a dystopian near future, single people, according to the laws of The City, are taken to The Hotel, where they are obliged to find a romantic partner in forty-five days or are transformed into animals and sent off into The Woods.",
+    "director": "Yorgos Lanthimos"
   },
   {
     "id": "122",
@@ -1344,7 +1465,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/dmJW8IAKHKxFNiUnoDR7JfsK7Rp.jpg",
     "rating": 7.6,
-    "overview": "Caleb, a coder at the world's largest internet company, wins a competition to spend a week at a private mountain retreat belonging to Nathan, the reclusive CEO of the company. But when Caleb arrives at the remote location he finds that he will have to participate in a strange and fascinating experiment in which he must interact with the world's first true artificial intelligence, housed in the body of a beautiful robot girl."
+    "overview": "Caleb, a coder at the world's largest internet company, wins a competition to spend a week at a private mountain retreat belonging to Nathan, the reclusive CEO of the company. But when Caleb arrives at the remote location he finds that he will have to participate in a strange and fascinating experiment in which he must interact with the world's first true artificial intelligence, housed in the body of a beautiful robot girl.",
+    "director": "Alex Garland"
   },
   {
     "id": "123",
@@ -1355,7 +1477,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/pEzNVQfdzYDzVK0XqxERIw2x2se.jpg",
     "rating": 7.6,
-    "overview": "Taking place after alien crafts land around the world, an expert linguist is recruited by the military to determine whether they come in peace or are a threat."
+    "overview": "Taking place after alien crafts land around the world, an expert linguist is recruited by the military to determine whether they come in peace or are a threat.",
+    "director": "Denis Villeneuve"
   },
   {
     "id": "124",
@@ -1366,7 +1489,8 @@ const INITIAL_WATCHLIST = [
     "isNew": false,
     "poster": "https://image.tmdb.org/t/p/w500/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg",
     "rating": 8.5,
-    "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage."
+    "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
+    "director": "Christopher Nolan"
   },
   {
     "id": "125",
@@ -1377,7 +1501,8 @@ const INITIAL_WATCHLIST = [
     "isNew": true,
     "poster": "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
     "rating": 8.1,
-    "overview": "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, Paul endeavors to prevent a terrible future only he can foresee."
+    "overview": "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, Paul endeavors to prevent a terrible future only he can foresee.",
+    "director": "Denis Villeneuve"
   }
 ];
 

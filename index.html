@@ -47,6 +47,9 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-add-director" class="btn btn-ghost" title="Import a director's filmography">
+          <span>🎬</span> Add Director
+        </button>
         <button id="add-btn" class="btn btn-primary" title="Add a new title">
           <span>＋</span> Add Title
         </button>
@@ -82,50 +85,68 @@
       </div>
     </section>
 
-    <!-- Navigation Filter Pills -->
-    <nav class="filter-bar" id="filter-bar" aria-label="Category Filters"></nav>
+    <!-- Sticky Filtering & Search Bar (accessible anywhere while scrolling) -->
+    <div class="sticky-filter-wrapper" id="sticky-filter-wrapper">
+      <div class="sticky-filter-inner">
+        <!-- Navigation Filter Pills -->
+        <nav class="filter-bar" id="filter-bar" aria-label="Category Filters"></nav>
 
-    <!-- Search & Control Toolbar -->
-    <section class="controls-grid" aria-label="Search and sorting controls">
-      <div class="search-wrapper">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input 
-          type="search" 
-          id="search-input" 
-          class="search-input" 
-          placeholder="Search by title, release year, or IMDb ID…" 
-          autocomplete="off"
-          spellcheck="false"
-        >
-        <button id="search-clear-btn" class="search-clear-btn" style="display: none;" title="Clear search">✕</button>
+        <!-- Search & Control Toolbar -->
+        <section class="controls-grid" aria-label="Search, director filter, and sorting controls">
+          <div class="search-wrapper">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input 
+              type="search" 
+              id="search-input" 
+              class="search-input" 
+              placeholder="Search by title, director, release year…" 
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <button id="search-clear-btn" class="search-clear-btn" style="display: none;" title="Clear search">✕</button>
+          </div>
+
+          <div class="controls-actions">
+            <select id="director-select" class="select-control director-select" title="Filter by Director">
+              <option value="">🎬 All Directors</option>
+            </select>
+
+            <select id="sort-select" class="select-control" title="Sort watchlist">
+              <option value="added">Sort: Recently Added</option>
+              <option value="director-asc">Sort: Director (A-Z)</option>
+              <option value="year-desc">Sort: Year (Newest)</option>
+              <option value="year-asc">Sort: Year (Oldest)</option>
+              <option value="title-asc">Sort: Title (A-Z)</option>
+            </select>
+
+            <button id="btn-export-csv" class="btn btn-ghost" title="Export current list to CSV">
+              CSV
+            </button>
+
+            <button id="btn-export-json" class="btn btn-ghost" title="Download full JSON backup">
+              Backup
+            </button>
+
+            <button id="btn-import-json" class="btn btn-ghost" title="Restore from JSON backup">
+              Restore
+            </button>
+            <input type="file" id="file-input-json" accept=".json" style="display: none;">
+
+            <button id="add-btn-mobile" class="btn btn-primary" style="display: none;" title="Add title">
+              ＋ Add
+            </button>
+          </div>
+        </section>
+
+        <!-- Active Director Filter Banner -->
+        <div id="active-director-banner" class="active-director-banner" style="display: none;">
+          <span class="active-director-text">
+            <span>🎬</span> Filtering by Director: <strong id="active-director-name"></strong>
+          </span>
+          <button id="clear-director-filter" class="btn-clear-tag" title="Clear director filter">✕ Show All Directors</button>
+        </div>
       </div>
-
-      <div class="controls-actions">
-        <select id="sort-select" class="select-control" title="Sort watchlist">
-          <option value="added">Sort: Recently Added</option>
-          <option value="year-desc">Sort: Year (Newest)</option>
-          <option value="year-asc">Sort: Year (Oldest)</option>
-          <option value="title-asc">Sort: Title (A-Z)</option>
-        </select>
-
-        <button id="btn-export-csv" class="btn btn-ghost" title="Export current list to CSV">
-          CSV
-        </button>
-
-        <button id="btn-export-json" class="btn btn-ghost" title="Download full JSON backup">
-          Backup
-        </button>
-
-        <button id="btn-import-json" class="btn btn-ghost" title="Restore from JSON backup">
-          Restore
-        </button>
-        <input type="file" id="file-input-json" accept=".json" style="display: none;">
-
-        <button id="add-btn-mobile" class="btn btn-primary" style="display: none;" title="Add title">
-          ＋ Add
-        </button>
-      </div>
-    </section>
+    </div>
 
     <!-- Dynamic Media Grid -->
     <section class="media-grid" id="media-grid" aria-live="polite"></section>
@@ -170,6 +191,11 @@
         </div>
 
         <div class="form-group">
+          <label for="input-director" class="form-label">Director (optional)</label>
+          <input type="text" id="input-director" class="form-input" placeholder="e.g. Christopher Nolan, Denis Villeneuve">
+        </div>
+
+        <div class="form-group">
           <label for="input-type" class="form-label">Media Category</label>
           <select id="input-type" class="form-input">
             <option value="movie">Movie</option>
@@ -207,13 +233,89 @@
           <div class="detail-badges" id="detail-badges"></div>
           <h2 class="detail-heading" id="detail-heading"></h2>
           <div class="detail-meta-row" id="detail-meta-row"></div>
+          <div class="detail-director-box" id="detail-director-box" style="display: none;">
+            <span class="detail-director-icon">🎬</span>
+            <span>Directed by: <strong id="detail-director-name"></strong></span>
+          </div>
           <p class="detail-overview" id="detail-overview"></p>
           
           <div class="detail-actions">
             <button id="detail-toggle-watched" class="btn btn-primary"></button>
+            <button id="detail-filter-director" class="btn btn-ghost" style="display: none;"><span>🎬</span> Filter by this Director</button>
             <button id="detail-edit-btn" class="btn btn-ghost">Edit Item</button>
             <button id="detail-copy-imdb" class="btn btn-ghost">Copy IMDb ID</button>
             <a id="detail-visit-imdb" class="btn btn-ghost" href="#" target="_self">Visit IMDb (Same Tab)</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Director Filmography Import Modal -->
+  <div class="modal-backdrop" id="director-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="director-modal-title">
+    <div class="modal-dialog modal-dialog-lg director-modal-dialog">
+      <div class="modal-header">
+        <div class="director-modal-title-group">
+          <div class="director-modal-icon">🎬</div>
+          <div>
+            <h3 class="modal-title" id="director-modal-title">Add Director Filmography</h3>
+            <p class="modal-subtitle">Search any filmmaker to automatically import their directed cinema & TV works into your watchlist</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="director-modal-close-btn" title="Close dialog">✕</button>
+      </div>
+
+      <div class="director-modal-body">
+        <!-- Search bar for director -->
+        <form id="director-search-form" class="director-search-form">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="director-search-input" 
+              class="search-input" 
+              placeholder="e.g. Denis Villeneuve, Christopher Nolan, Hayao Miyazaki, David Lynch…" 
+              autocomplete="off"
+              required
+            >
+          </div>
+          <button type="submit" class="btn btn-primary" id="btn-search-director">Search</button>
+        </form>
+
+        <!-- Loading state -->
+        <div id="director-loading-state" class="director-loading-state" style="display: none;">
+          <div class="loading-spinner"></div>
+          <span id="director-loading-text">Searching director catalog…</span>
+        </div>
+
+        <!-- Person selector (if multiple matches) -->
+        <div id="director-person-results" class="director-person-results" style="display: none;">
+          <div class="results-instruction">Multiple directors found. Select one to load filmography:</div>
+          <div id="director-person-cards" class="director-person-cards"></div>
+        </div>
+
+        <!-- Filmography Checklist View -->
+        <div id="director-filmography-view" class="director-filmography-view" style="display: none;">
+          <div class="director-profile-header">
+            <img id="director-profile-avatar" class="director-avatar" alt="Director Avatar" src="">
+            <div class="director-profile-details">
+              <h4 id="director-profile-name" class="director-profile-name"></h4>
+              <p id="director-profile-stats" class="director-profile-stats"></p>
+            </div>
+            <div class="director-select-actions">
+              <button type="button" class="btn-text-sm" id="btn-select-all-credits">Select All</button>
+              <span class="text-separator">•</span>
+              <button type="button" class="btn-text-sm" id="btn-deselect-all-credits">Deselect All</button>
+            </div>
+          </div>
+
+          <div class="filmography-checklist" id="filmography-checklist"></div>
+
+          <div class="director-import-footer">
+            <button type="button" class="btn btn-ghost" id="director-modal-cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btn-confirm-import-credits">
+              <span id="import-btn-icon">＋</span> <span id="import-btn-label">Import Selected Titles</span>
+            </button>
           </div>
         </div>
       </div>

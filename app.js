@@ -21,10 +21,13 @@
     constructor() {
       this.titles = this.loadInitialData();
       this.activeFilter = 'all';
+      this.activeDirector = '';
       this.searchQuery = '';
       this.sortBy = 'added';
       this.editingId = null;
       this.activeDetailItem = null;
+      this.pendingDirectorCredits = [];
+      this.pendingDirectorPerson = null;
       this.toastTimer = null;
 
       this.cacheDOM();
@@ -34,7 +37,7 @@
 
     /**
      * Load data with backward-compatible migration from legacy versions.
-     * Merges high-res posters, ratings, and synopses into any existing saved items.
+     * Merges high-res posters, ratings, synopses, and directors into any existing saved items.
      */
     loadInitialData() {
       const defaultData = window.INITIAL_WATCHLIST || [];
@@ -51,7 +54,7 @@
         if (savedV6) {
           const parsed = JSON.parse(savedV6);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Merge enriched metadata (posters, ratings, synopses) into saved items
+            // Merge enriched metadata (posters, ratings, synopses, directors) into saved items
             return parsed.map((item) => {
               const match = defaultMap.get((item.imdbId || '').toLowerCase()) ||
                             defaultMap.get((item.title || '').toLowerCase());
@@ -61,7 +64,8 @@
                   ...item,
                   poster: item.poster || match.poster,
                   rating: item.rating || match.rating,
-                  overview: item.overview || match.overview
+                  overview: item.overview || match.overview,
+                  director: item.director || match.director || ''
                 };
               }
               return item;
@@ -114,6 +118,10 @@
         searchInput: document.getElementById('search-input'),
         searchClearBtn: document.getElementById('search-clear-btn'),
         sortSelect: document.getElementById('sort-select'),
+        directorSelect: document.getElementById('director-select'),
+        activeDirectorBanner: document.getElementById('active-director-banner'),
+        activeDirectorName: document.getElementById('active-director-name'),
+        clearDirectorFilter: document.getElementById('clear-director-filter'),
         statTotal: document.getElementById('stat-total'),
         statWatched: document.getElementById('stat-watched'),
         statNew: document.getElementById('stat-new'),
@@ -122,6 +130,7 @@
         catalogSummary: document.getElementById('catalog-summary'),
         addBtn: document.getElementById('add-btn'),
         addBtnMobile: document.getElementById('add-btn-mobile'),
+        btnAddDirector: document.getElementById('btn-add-director'),
         
         // Add/Edit Modal
         modalBackdrop: document.getElementById('modal-backdrop'),
@@ -133,6 +142,7 @@
         inputTitle: document.getElementById('input-title'),
         inputYear: document.getElementById('input-year'),
         inputImdbId: document.getElementById('input-imdb'),
+        inputDirector: document.getElementById('input-director'),
         inputType: document.getElementById('input-type'),
         inputPoster: document.getElementById('input-poster'),
 
@@ -144,11 +154,35 @@
         detailBadges: document.getElementById('detail-badges'),
         detailHeading: document.getElementById('detail-heading'),
         detailMetaRow: document.getElementById('detail-meta-row'),
+        detailDirectorBox: document.getElementById('detail-director-box'),
+        detailDirectorName: document.getElementById('detail-director-name'),
         detailOverview: document.getElementById('detail-overview'),
         detailToggleWatched: document.getElementById('detail-toggle-watched'),
+        detailFilterDirector: document.getElementById('detail-filter-director'),
         detailEditBtn: document.getElementById('detail-edit-btn'),
         detailCopyImdb: document.getElementById('detail-copy-imdb'),
         detailVisitImdb: document.getElementById('detail-visit-imdb'),
+
+        // In-App Director Filmography Import Modal
+        directorModalBackdrop: document.getElementById('director-modal-backdrop'),
+        directorModalCloseBtn: document.getElementById('director-modal-close-btn'),
+        directorModalCancelBtn: document.getElementById('director-modal-cancel-btn'),
+        directorSearchForm: document.getElementById('director-search-form'),
+        directorSearchInput: document.getElementById('director-search-input'),
+        btnSearchDirector: document.getElementById('btn-search-director'),
+        directorLoadingState: document.getElementById('director-loading-state'),
+        directorLoadingText: document.getElementById('director-loading-text'),
+        directorPersonResults: document.getElementById('director-person-results'),
+        directorPersonCards: document.getElementById('director-person-cards'),
+        directorFilmographyView: document.getElementById('director-filmography-view'),
+        directorProfileAvatar: document.getElementById('director-profile-avatar'),
+        directorProfileName: document.getElementById('director-profile-name'),
+        directorProfileStats: document.getElementById('director-profile-stats'),
+        btnSelectAllCredits: document.getElementById('btn-select-all-credits'),
+        btnDeselectAllCredits: document.getElementById('btn-deselect-all-credits'),
+        filmographyChecklist: document.getElementById('filmography-checklist'),
+        btnConfirmImportCredits: document.getElementById('btn-confirm-import-credits'),
+        importBtnLabel: document.getElementById('import-btn-label'),
 
         btnExportCsv: document.getElementById('btn-export-csv'),
         btnExportJson: document.getElementById('btn-export-json'),
@@ -175,16 +209,35 @@
         this.render();
       });
 
+      // Director select dropdown
+      if (this.dom.directorSelect) {
+        this.dom.directorSelect.addEventListener('change', (e) => {
+          this.setDirectorFilter(e.target.value);
+        });
+      }
+
+      // Clear director banner button
+      if (this.dom.clearDirectorFilter) {
+        this.dom.clearDirectorFilter.addEventListener('click', () => {
+          this.setDirectorFilter('');
+        });
+      }
+
       // Sort
       this.dom.sortSelect.addEventListener('change', (e) => {
         this.sortBy = e.target.value;
         this.render();
       });
 
-      // Add Buttons
+      // Add Title Buttons
       this.dom.addBtn.addEventListener('click', () => this.openAddModal());
       if (this.dom.addBtnMobile) {
         this.dom.addBtnMobile.addEventListener('click', () => this.openAddModal());
+      }
+
+      // Add Director Button
+      if (this.dom.btnAddDirector) {
+        this.dom.btnAddDirector.addEventListener('click', () => this.openDirectorModal());
       }
 
       // Add/Edit Modal Events
@@ -207,6 +260,14 @@
         }
       });
 
+      this.dom.detailFilterDirector.addEventListener('click', () => {
+        if (this.activeDetailItem && this.activeDetailItem.director) {
+          const dir = this.activeDetailItem.director;
+          this.closeDetailModal();
+          this.setDirectorFilter(dir);
+        }
+      });
+
       this.dom.detailEditBtn.addEventListener('click', () => {
         if (this.activeDetailItem) {
           const id = this.activeDetailItem.id;
@@ -221,10 +282,43 @@
         }
       });
 
+      // Director Filmography Modal Events
+      if (this.dom.directorModalCloseBtn) {
+        this.dom.directorModalCloseBtn.addEventListener('click', () => this.closeDirectorModal());
+      }
+      if (this.dom.directorModalCancelBtn) {
+        this.dom.directorModalCancelBtn.addEventListener('click', () => this.closeDirectorModal());
+      }
+      if (this.dom.directorModalBackdrop) {
+        this.dom.directorModalBackdrop.addEventListener('click', (e) => {
+          if (e.target === this.dom.directorModalBackdrop) this.closeDirectorModal();
+        });
+      }
+
+      if (this.dom.directorSearchForm) {
+        this.dom.directorSearchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const query = this.dom.directorSearchInput.value.trim();
+          this.searchDirector(query);
+        });
+      }
+
+      if (this.dom.btnSelectAllCredits) {
+        this.dom.btnSelectAllCredits.addEventListener('click', () => this.selectAllCredits(true));
+      }
+      if (this.dom.btnDeselectAllCredits) {
+        this.dom.btnDeselectAllCredits.addEventListener('click', () => this.selectAllCredits(false));
+      }
+      if (this.dom.btnConfirmImportCredits) {
+        this.dom.btnConfirmImportCredits.addEventListener('click', () => this.importSelectedCredits());
+      }
+
       // Universal Keyboard Navigation (Escape closes any open modal)
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-          if (this.dom.detailsBackdrop.classList.contains('open')) {
+          if (this.dom.directorModalBackdrop && this.dom.directorModalBackdrop.classList.contains('open')) {
+            this.closeDirectorModal();
+          } else if (this.dom.detailsBackdrop.classList.contains('open')) {
             this.closeDetailModal();
           } else if (this.dom.modalBackdrop.classList.contains('open')) {
             this.closeModal();
@@ -283,6 +377,7 @@
       this.dom.inputTitle.value = '';
       this.dom.inputYear.value = new Date().getFullYear().toString();
       this.dom.inputImdbId.value = '';
+      if (this.dom.inputDirector) this.dom.inputDirector.value = this.activeDirector || '';
       this.dom.inputType.value = 'movie';
       if (this.dom.inputPoster) this.dom.inputPoster.value = '';
       this.dom.modalBackdrop.classList.add('open');
@@ -298,6 +393,7 @@
       this.dom.inputTitle.value = item.title;
       this.dom.inputYear.value = item.year;
       this.dom.inputImdbId.value = item.imdbId;
+      if (this.dom.inputDirector) this.dom.inputDirector.value = item.director || '';
       this.dom.inputType.value = item.type;
       if (this.dom.inputPoster) this.dom.inputPoster.value = item.poster || '';
       this.dom.modalBackdrop.classList.add('open');
@@ -356,6 +452,21 @@
         <span>IMDb: <strong>${item.imdbId}</strong></span>
       `;
 
+      // Director Box & Quick Filter Action
+      if (this.dom.detailDirectorBox) {
+        if (item.director) {
+          this.dom.detailDirectorBox.style.display = 'flex';
+          this.dom.detailDirectorName.textContent = item.director;
+          if (this.dom.detailFilterDirector) {
+            this.dom.detailFilterDirector.style.display = 'inline-flex';
+            this.dom.detailFilterDirector.innerHTML = `<span>🎬</span> Filter by ${item.director}`;
+          }
+        } else {
+          this.dom.detailDirectorBox.style.display = 'none';
+          if (this.dom.detailFilterDirector) this.dom.detailFilterDirector.style.display = 'none';
+        }
+      }
+
       // Synopsis / Overview
       if (this.dom.detailOverview) {
         if (item.overview) {
@@ -385,6 +496,7 @@
       const title = this.dom.inputTitle.value.trim();
       const year = this.dom.inputYear.value.trim() || String(new Date().getFullYear());
       let imdbId = this.dom.inputImdbId.value.trim();
+      const director = this.dom.inputDirector ? this.dom.inputDirector.value.trim() : '';
       const type = this.dom.inputType.value;
       const customPoster = this.dom.inputPoster ? this.dom.inputPoster.value.trim() : '';
 
@@ -405,7 +517,7 @@
       if (this.editingId) {
         this.titles = this.titles.map((item) =>
           item.id === this.editingId
-            ? { ...item, title, year, imdbId, type, ...(customPoster ? { poster: customPoster } : {}) }
+            ? { ...item, title, year, imdbId, director, type, ...(customPoster ? { poster: customPoster } : {}) }
             : item
         );
         this.showToast(`Updated "${title}"`);
@@ -423,6 +535,7 @@
           imdbId,
           title,
           year,
+          director,
           type,
           poster: customPoster || `https://img.omdbapi.com/?i=${imdbId}&apikey=thewdb`,
           isNew: true,
@@ -493,12 +606,20 @@
         list = list.filter((item) => item.type === this.activeFilter);
       }
 
+      // Director filter
+      if (this.activeDirector) {
+        list = list.filter((item) =>
+          (item.director || '').toLowerCase().includes(this.activeDirector.toLowerCase())
+        );
+      }
+
       // Search query
       if (this.searchQuery) {
         list = list.filter(
           (item) =>
             item.title.toLowerCase().includes(this.searchQuery) ||
             item.year.toLowerCase().includes(this.searchQuery) ||
+            (item.director && item.director.toLowerCase().includes(this.searchQuery)) ||
             item.imdbId.toLowerCase().includes(this.searchQuery)
         );
       }
@@ -506,6 +627,8 @@
       // Sorting
       if (this.sortBy === 'title-asc') {
         list.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (this.sortBy === 'director-asc') {
+        list.sort((a, b) => (a.director || 'zzz').localeCompare(b.director || 'zzz') || a.title.localeCompare(b.title));
       } else if (this.sortBy === 'year-desc') {
         list.sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
       } else if (this.sortBy === 'year-asc') {
@@ -516,6 +639,361 @@
       }
 
       return list;
+    }
+
+    renderDirectorSelect() {
+      if (!this.dom.directorSelect) return;
+
+      // Extract unique directors and counts
+      const directorCounts = new Map();
+      this.titles.forEach((item) => {
+        if (item.director) {
+          const parts = item.director.split(',').map((s) => s.trim()).filter(Boolean);
+          parts.forEach((dir) => {
+            directorCounts.set(dir, (directorCounts.get(dir) || 0) + 1);
+          });
+        }
+      });
+
+      const sortedDirectors = Array.from(directorCounts.entries()).sort((a, b) =>
+        a[0].localeCompare(b[0])
+      );
+
+      const currentVal = this.activeDirector;
+
+      this.dom.directorSelect.innerHTML = '';
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = `🎬 All Directors (${sortedDirectors.length})`;
+      this.dom.directorSelect.appendChild(defaultOpt);
+
+      sortedDirectors.forEach(([dir, count]) => {
+        const opt = document.createElement('option');
+        opt.value = dir;
+        opt.textContent = `${dir} (${count})`;
+        if (dir.toLowerCase() === currentVal.toLowerCase()) {
+          opt.selected = true;
+        }
+        this.dom.directorSelect.appendChild(opt);
+      });
+
+      this.dom.directorSelect.value = currentVal;
+    }
+
+    setDirectorFilter(directorName) {
+      this.activeDirector = (directorName || '').trim();
+      if (this.dom.directorSelect) {
+        this.dom.directorSelect.value = this.activeDirector;
+      }
+
+      if (this.activeDirector) {
+        if (this.dom.activeDirectorBanner) {
+          this.dom.activeDirectorBanner.style.display = 'flex';
+          this.dom.activeDirectorName.textContent = this.activeDirector;
+        }
+        this.showToast(`Filtered by Director: ${this.activeDirector}`);
+      } else {
+        if (this.dom.activeDirectorBanner) {
+          this.dom.activeDirectorBanner.style.display = 'none';
+        }
+      }
+
+      this.render();
+    }
+
+    openDirectorModal() {
+      this.dom.directorSearchInput.value = '';
+      this.dom.directorLoadingState.style.display = 'none';
+      this.dom.directorPersonResults.style.display = 'none';
+      this.dom.directorFilmographyView.style.display = 'none';
+      this.dom.directorModalBackdrop.classList.add('open');
+      setTimeout(() => this.dom.directorSearchInput.focus(), 100);
+    }
+
+    closeDirectorModal() {
+      this.dom.directorModalBackdrop.classList.remove('open');
+      this.pendingDirectorCredits = [];
+      this.pendingDirectorPerson = null;
+    }
+
+    async searchDirector(query) {
+      if (!query) return;
+      this.dom.directorLoadingState.style.display = 'flex';
+      this.dom.directorLoadingText.textContent = `Searching TMDB for "${query}"…`;
+      this.dom.directorPersonResults.style.display = 'none';
+      this.dom.directorFilmographyView.style.display = 'none';
+
+      try {
+        const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+        const res = await fetch(`https://api.themoviedb.org/3/search/person?query=${encodeURIComponent(query)}&api_key=${apiKey}`);
+        if (!res.ok) throw new Error(`TMDB error (${res.status})`);
+        const data = await res.json();
+        const results = (data.results || []).filter((p) => 
+          p.known_for_department === 'Directing' || 
+          (p.known_for && p.known_for.length > 0)
+        );
+
+        this.dom.directorLoadingState.style.display = 'none';
+
+        if (results.length === 0) {
+          this.showToast(`No directors found matching "${query}"`);
+          return;
+        }
+
+        if (results.length === 1) {
+          // Exactly one match, load filmography directly
+          this.loadDirectorFilmography(results[0]);
+        } else {
+          // Multiple candidates, show selection cards
+          this.renderDirectorCandidates(results);
+        }
+      } catch (err) {
+        console.error('Failed to search director:', err);
+        this.dom.directorLoadingState.style.display = 'none';
+        this.showToast(`Director search failed: ${err.message}`);
+      }
+    }
+
+    renderDirectorCandidates(candidates) {
+      this.dom.directorPersonCards.innerHTML = '';
+      candidates.slice(0, 8).forEach((person) => {
+        const card = document.createElement('div');
+        card.className = 'director-person-card';
+        const avatarUrl = person.profile_path 
+          ? `https://image.tmdb.org/t/p/w185${person.profile_path}` 
+          : 'https://via.placeholder.com/100x100?text=Director';
+        
+        const knownTitles = (person.known_for || [])
+          .map((k) => k.title || k.name)
+          .filter(Boolean)
+          .slice(0, 2)
+          .join(', ');
+
+        card.innerHTML = `
+          <img class="director-person-avatar" src="${avatarUrl}" alt="${person.name}">
+          <div class="director-person-info">
+            <span class="director-person-name">${person.name}</span>
+            <span class="director-person-dept">${person.known_for_department || 'Directing'} ${knownTitles ? '• ' + knownTitles : ''}</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          this.loadDirectorFilmography(person);
+        });
+
+        this.dom.directorPersonCards.appendChild(card);
+      });
+
+      this.dom.directorPersonResults.style.display = 'block';
+    }
+
+    async loadDirectorFilmography(person) {
+      this.pendingDirectorPerson = person;
+      this.dom.directorPersonResults.style.display = 'none';
+      this.dom.directorLoadingState.style.display = 'flex';
+      this.dom.directorLoadingText.textContent = `Loading complete filmography for ${person.name}…`;
+
+      try {
+        const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
+        const res = await fetch(`https://api.themoviedb.org/3/person/${person.id}/combined_credits?api_key=${apiKey}`);
+        if (!res.ok) throw new Error(`TMDB error (${res.status})`);
+        const data = await res.json();
+
+        // Filter crew where job is Director or department is Directing
+        const crew = (data.crew || []).filter((c) => c.job === 'Director' || c.department === 'Directing');
+        
+        // Deduplicate by item id
+        const seen = new Set();
+        const credits = [];
+        crew.forEach((c) => {
+          if (!seen.has(c.id)) {
+            seen.add(c.id);
+            credits.push(c);
+          }
+        });
+
+        // Sort by vote_count descending
+        credits.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
+
+        this.dom.directorLoadingState.style.display = 'none';
+
+        if (credits.length === 0) {
+          this.showToast(`No directed titles found for ${person.name}`);
+          return;
+        }
+
+        this.renderFilmographyChecklist(person, credits);
+      } catch (err) {
+        console.error('Failed to load filmography:', err);
+        this.dom.directorLoadingState.style.display = 'none';
+        this.showToast(`Failed to load filmography: ${err.message}`);
+      }
+    }
+
+    renderFilmographyChecklist(person, credits) {
+      this.pendingDirectorCredits = credits;
+
+      // Profile Header
+      const avatarUrl = person.profile_path 
+        ? `https://image.tmdb.org/t/p/w185${person.profile_path}` 
+        : 'https://via.placeholder.com/100x100?text=Director';
+      this.dom.directorProfileAvatar.src = avatarUrl;
+      this.dom.directorProfileName.textContent = person.name;
+      this.dom.directorProfileStats.textContent = `${credits.length} directed titles available to import`;
+
+      // Existing titles lookup for quick deduplication badge
+      const existingLookup = new Set();
+      this.titles.forEach((t) => {
+        existingLookup.add(t.title.toLowerCase());
+        if (t.imdbId) existingLookup.add(t.imdbId.toLowerCase());
+      });
+
+      this.dom.filmographyChecklist.innerHTML = '';
+
+      credits.forEach((credit, idx) => {
+        const title = credit.title || credit.name || 'Untitled';
+        const year = (credit.release_date || credit.first_air_date || '').slice(0, 4) || '—';
+        const posterUrl = credit.poster_path 
+          ? `https://image.tmdb.org/t/p/w185${credit.poster_path}` 
+          : 'https://via.placeholder.com/92x138?text=No+Poster';
+        const rating = credit.vote_average ? (Math.round(credit.vote_average * 10) / 10).toFixed(1) : null;
+        const isTv = credit.media_type === 'tv';
+        const isAlreadyAdded = existingLookup.has(title.toLowerCase());
+
+        const row = document.createElement('label');
+        row.className = `filmography-item ${isAlreadyAdded ? 'already-added' : ''}`;
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'filmography-checkbox';
+        cb.dataset.index = idx;
+        cb.checked = !isAlreadyAdded;
+
+        cb.addEventListener('change', () => this.updateImportButtonCount());
+
+        const posterImg = document.createElement('img');
+        posterImg.className = 'filmography-poster';
+        posterImg.src = posterUrl;
+        posterImg.alt = title;
+
+        const info = document.createElement('div');
+        info.className = 'filmography-info';
+
+        const titleRow = document.createElement('div');
+        titleRow.className = 'filmography-title-row';
+
+        const titleEl = document.createElement('span');
+        titleEl.className = 'filmography-title';
+        titleEl.textContent = title;
+        titleRow.appendChild(titleEl);
+
+        if (isAlreadyAdded) {
+          const badge = document.createElement('span');
+          badge.className = 'badge';
+          badge.style.cssText = 'background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.65rem; padding: 0.1rem 0.4rem;';
+          badge.textContent = 'In Watchlist ✓';
+          titleRow.appendChild(badge);
+        }
+
+        const metaRow = document.createElement('div');
+        metaRow.className = 'filmography-meta';
+        metaRow.innerHTML = `
+          <span>${year}</span>
+          <span>•</span>
+          <span class="badge badge-type" style="font-size: 0.65rem; padding: 0.1rem 0.35rem;">${isTv ? 'TV' : 'MOVIE'}</span>
+          ${rating ? `<span>•</span> <span style="color: #fbbf24;">★ ${rating}</span>` : ''}
+          ${credit.vote_count ? `<span style="color: var(--text-muted);">(${credit.vote_count.toLocaleString()} votes)</span>` : ''}
+        `;
+
+        info.appendChild(titleRow);
+        info.appendChild(metaRow);
+
+        row.appendChild(cb);
+        row.appendChild(posterImg);
+        row.appendChild(info);
+
+        this.dom.filmographyChecklist.appendChild(row);
+      });
+
+      this.updateImportButtonCount();
+      this.dom.directorFilmographyView.style.display = 'block';
+    }
+
+    updateImportButtonCount() {
+      const checked = this.dom.filmographyChecklist.querySelectorAll('.filmography-checkbox:checked');
+      const count = checked.length;
+      this.dom.importBtnLabel.textContent = `Import ${count} Title${count === 1 ? '' : 's'} to Watchlist`;
+      this.dom.btnConfirmImportCredits.disabled = count === 0;
+    }
+
+    selectAllCredits(select = true) {
+      const cbs = this.dom.filmographyChecklist.querySelectorAll('.filmography-checkbox');
+      cbs.forEach((cb) => { cb.checked = select; });
+      this.updateImportButtonCount();
+    }
+
+    importSelectedCredits() {
+      if (!this.pendingDirectorCredits || !this.pendingDirectorPerson) return;
+      const checkedBoxes = Array.from(this.dom.filmographyChecklist.querySelectorAll('.filmography-checkbox:checked'));
+      if (checkedBoxes.length === 0) {
+        this.showToast('No titles selected for import');
+        return;
+      }
+
+      const directorName = this.pendingDirectorPerson.name;
+      const newItems = [];
+      const now = Date.now();
+
+      checkedBoxes.forEach((cb, idx) => {
+        const credit = this.pendingDirectorCredits[parseInt(cb.dataset.index, 10)];
+        if (!credit) return;
+
+        const title = credit.title || credit.name || 'Untitled';
+        const year = (credit.release_date || credit.first_air_date || '').slice(0, 4) || 'Unknown';
+        const rating = credit.vote_average ? Math.round(credit.vote_average * 10) / 10 : undefined;
+        const poster = credit.poster_path ? `https://image.tmdb.org/t/p/w500${credit.poster_path}` : '';
+        const mediaType = credit.media_type === 'tv' ? 'tv' : 'movie';
+
+        newItems.push({
+          id: `tmdb_${credit.id}`,
+          imdbId: `tmdb_${credit.id}`,
+          title,
+          year,
+          type: mediaType,
+          poster,
+          rating,
+          overview: credit.overview || '',
+          director: directorName,
+          watched: false,
+          isNew: true,
+          addedAt: now + idx * 10
+        });
+      });
+
+      // Filter out duplicates that might already be in this.titles
+      const existingIds = new Set(this.titles.map((t) => (t.id || '').toLowerCase()));
+      const existingTitles = new Set(this.titles.map((t) => (t.title || '').toLowerCase()));
+      
+      const toAdd = newItems.filter((item) => 
+        !existingIds.has(item.id.toLowerCase()) && 
+        !existingTitles.has(item.title.toLowerCase())
+      );
+
+      if (toAdd.length === 0) {
+        this.showToast('All selected titles are already in your watchlist');
+        this.closeDirectorModal();
+        this.setDirectorFilter(directorName);
+        return;
+      }
+
+      // Add to front of watchlist
+      this.titles = [...toAdd, ...this.titles];
+      this.saveData();
+      this.closeDirectorModal();
+      
+      // Automatically activate filter for this director
+      this.setDirectorFilter(directorName);
+      this.showToast(`Imported ${toAdd.length} titles by ${directorName}! 🎬`);
     }
 
     updateStats() {
@@ -602,6 +1080,18 @@
     render() {
       this.updateStats();
       this.renderFilters();
+      this.renderDirectorSelect();
+
+      if (this.activeDirector) {
+        if (this.dom.activeDirectorBanner) {
+          this.dom.activeDirectorBanner.style.display = 'flex';
+          this.dom.activeDirectorName.textContent = this.activeDirector;
+        }
+      } else {
+        if (this.dom.activeDirectorBanner) {
+          this.dom.activeDirectorBanner.style.display = 'none';
+        }
+      }
 
       const filtered = this.getFilteredTitles();
       this.dom.mediaGrid.innerHTML = '';
@@ -612,14 +1102,16 @@
         empty.innerHTML = `
           <div class="empty-icon">🎬</div>
           <h3 class="empty-title">No matching titles found</h3>
-          <p class="empty-desc">Try clearing your search query or switching filter tabs.</p>
+          <p class="empty-desc">Try clearing your search query, switching filter tabs, or resetting director filter.</p>
           <button class="btn btn-ghost" id="reset-filter-btn">Reset All Filters</button>
         `;
         empty.querySelector('#reset-filter-btn').addEventListener('click', () => {
           this.activeFilter = 'all';
+          this.activeDirector = '';
           this.searchQuery = '';
           this.dom.searchInput.value = '';
           this.dom.searchClearBtn.style.display = 'none';
+          if (this.dom.directorSelect) this.dom.directorSelect.value = '';
           this.render();
         });
         this.dom.mediaGrid.appendChild(empty);
@@ -657,7 +1149,6 @@
 
         img.addEventListener('error', () => {
           if (img.src !== `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`) {
-            // Try OMDB before final typographic fallback
             img.src = `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
           } else {
             img.style.display = 'none';
@@ -754,6 +1245,20 @@
         titleEl.textContent = item.title;
         details.appendChild(titleEl);
 
+        // Director Badge Link
+        if (item.director) {
+          const dirBtn = document.createElement('button');
+          dirBtn.className = 'card-director';
+          dirBtn.type = 'button';
+          dirBtn.title = `Filter by ${item.director}`;
+          dirBtn.innerHTML = `<span>🎬</span> <span>${item.director}</span>`;
+          dirBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.setDirectorFilter(item.director);
+          });
+          details.appendChild(dirBtn);
+        }
+
         const meta = document.createElement('div');
         meta.className = 'card-meta';
 
@@ -798,9 +1303,10 @@
     }
 
     exportCsv() {
-      const headers = ['title', 'year', 'imdbId', 'type', 'watched', 'isNew'];
+      const headers = ['title', 'director', 'year', 'imdbId', 'type', 'watched', 'isNew'];
       const rows = this.titles.map((t) => [
         `"${t.title.replace(/"/g, '""')}"`,
+        `"${(t.director || '').replace(/"/g, '""')}"`,
         t.year,
         t.imdbId,
         t.type,
