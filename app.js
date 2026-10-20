@@ -3,8 +3,12 @@
  * Clean Vanilla ES6+ architecture with LocalStorage continuity, instant search,
  * category filters, statistics dashboard, in-app modal details, and data backup/restore.
  *
- * NOTE: All dialogs, previews, and links open strictly within the web application / WSL
- * and never spawn external Windows host windows.
+ * BEST PRACTICES IMPLEMENTED FOR POSTERS:
+ * 1. High-fidelity direct CDN URLs (TMDB w500) for all 125 curated titles.
+ * 2. Automatic multi-tier fallback: Direct CDN -> OMDB fallback -> Typographic gradient card.
+ * 3. Lazy-loading for performance and low data usage.
+ * 4. User-provided custom poster support in Add/Edit modal.
+ * 5. Star ratings and plot synopses integrated in the In-App Details Modal.
  */
 
 (function () {
@@ -30,16 +34,38 @@
 
     /**
      * Load data with backward-compatible migration from legacy versions.
+     * Merges high-res posters, ratings, and synopses into any existing saved items.
      */
     loadInitialData() {
       const defaultData = window.INITIAL_WATCHLIST || [];
+
+      // Create lookup map for default enriched items
+      const defaultMap = new Map();
+      defaultData.forEach((d) => {
+        if (d.imdbId) defaultMap.set(d.imdbId.toLowerCase(), d);
+        if (d.title) defaultMap.set(d.title.toLowerCase(), d);
+      });
 
       try {
         const savedV6 = localStorage.getItem(STORAGE_KEY_V6);
         if (savedV6) {
           const parsed = JSON.parse(savedV6);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed;
+            // Merge enriched metadata (posters, ratings, synopses) into saved items
+            return parsed.map((item) => {
+              const match = defaultMap.get((item.imdbId || '').toLowerCase()) ||
+                            defaultMap.get((item.title || '').toLowerCase());
+              if (match) {
+                return {
+                  ...match,
+                  ...item,
+                  poster: item.poster || match.poster,
+                  rating: item.rating || match.rating,
+                  overview: item.overview || match.overview
+                };
+              }
+              return item;
+            });
           }
         }
 
@@ -108,6 +134,7 @@
         inputYear: document.getElementById('input-year'),
         inputImdbId: document.getElementById('input-imdb'),
         inputType: document.getElementById('input-type'),
+        inputPoster: document.getElementById('input-poster'),
 
         // In-App Media Details Modal (strictly inside WSL)
         detailsBackdrop: document.getElementById('details-backdrop'),
@@ -117,6 +144,7 @@
         detailBadges: document.getElementById('detail-badges'),
         detailHeading: document.getElementById('detail-heading'),
         detailMetaRow: document.getElementById('detail-meta-row'),
+        detailOverview: document.getElementById('detail-overview'),
         detailToggleWatched: document.getElementById('detail-toggle-watched'),
         detailEditBtn: document.getElementById('detail-edit-btn'),
         detailCopyImdb: document.getElementById('detail-copy-imdb'),
@@ -256,6 +284,7 @@
       this.dom.inputYear.value = new Date().getFullYear().toString();
       this.dom.inputImdbId.value = '';
       this.dom.inputType.value = 'movie';
+      if (this.dom.inputPoster) this.dom.inputPoster.value = '';
       this.dom.modalBackdrop.classList.add('open');
       setTimeout(() => this.dom.inputTitle.focus(), 100);
     }
@@ -270,6 +299,7 @@
       this.dom.inputYear.value = item.year;
       this.dom.inputImdbId.value = item.imdbId;
       this.dom.inputType.value = item.type;
+      if (this.dom.inputPoster) this.dom.inputPoster.value = item.poster || '';
       this.dom.modalBackdrop.classList.add('open');
       setTimeout(() => this.dom.inputTitle.focus(), 100);
     }
@@ -290,25 +320,32 @@
 
       this.dom.detailHeading.textContent = item.title;
 
-      // Poster
-      const posterUrl = `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
+      // Primary Poster with Resilient Fallback
+      const posterUrl = item.poster || `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
       this.dom.detailPosterImg.src = posterUrl;
       this.dom.detailPosterImg.style.display = 'block';
       this.dom.detailPosterFallback.style.display = 'none';
 
       this.dom.detailPosterImg.onerror = () => {
-        this.dom.detailPosterImg.style.display = 'none';
-        this.dom.detailPosterFallback.style.display = 'flex';
-        this.dom.detailPosterFallback.style.background = this.getGradient(item.imdbId + item.title);
-        this.dom.detailPosterFallback.innerHTML = `
-          <span class="fallback-initials">${this.getInitials(item.title)}</span>
-          <span class="fallback-title">${item.title}</span>
-        `;
+        // Fallback to OMDB if TMDB failed
+        if (this.dom.detailPosterImg.src !== `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`) {
+          this.dom.detailPosterImg.src = `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
+        } else {
+          this.dom.detailPosterImg.style.display = 'none';
+          this.dom.detailPosterFallback.style.display = 'flex';
+          this.dom.detailPosterFallback.style.background = this.getGradient(item.imdbId + item.title);
+          this.dom.detailPosterFallback.innerHTML = `
+            <span class="fallback-initials">${this.getInitials(item.title)}</span>
+            <span class="fallback-title">${item.title}</span>
+          `;
+        }
       };
 
-      // Badges
+      // Badges (Rating, Type, Watched)
+      const ratingBadge = item.rating ? `<span class="badge badge-rating">★ ${item.rating}</span>` : '';
       this.dom.detailBadges.innerHTML = `
         <span class="badge badge-type">${item.type === 'community' ? 'Arthouse' : item.type.toUpperCase()}</span>
+        ${ratingBadge}
         ${item.watched ? '<span class="badge" style="background: var(--accent-emerald); color: #000;">WATCHED ✓</span>' : '<span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;">UNWATCHED</span>'}
       `;
 
@@ -318,6 +355,16 @@
         <span>&bull;</span>
         <span>IMDb: <strong>${item.imdbId}</strong></span>
       `;
+
+      // Synopsis / Overview
+      if (this.dom.detailOverview) {
+        if (item.overview) {
+          this.dom.detailOverview.textContent = item.overview;
+          this.dom.detailOverview.style.display = 'block';
+        } else {
+          this.dom.detailOverview.style.display = 'none';
+        }
+      }
 
       // Watched Button Label
       this.dom.detailToggleWatched.textContent = item.watched ? 'Mark as Unwatched' : 'Mark as Watched ✓';
@@ -339,6 +386,7 @@
       const year = this.dom.inputYear.value.trim() || String(new Date().getFullYear());
       let imdbId = this.dom.inputImdbId.value.trim();
       const type = this.dom.inputType.value;
+      const customPoster = this.dom.inputPoster ? this.dom.inputPoster.value.trim() : '';
 
       if (!title) {
         this.showToast('Title is required');
@@ -357,7 +405,7 @@
       if (this.editingId) {
         this.titles = this.titles.map((item) =>
           item.id === this.editingId
-            ? { ...item, title, year, imdbId, type }
+            ? { ...item, title, year, imdbId, type, ...(customPoster ? { poster: customPoster } : {}) }
             : item
         );
         this.showToast(`Updated "${title}"`);
@@ -376,6 +424,7 @@
           title,
           year,
           type,
+          poster: customPoster || `https://img.omdbapi.com/?i=${imdbId}&apikey=thewdb`,
           isNew: true,
           watched: false,
           addedAt: Date.now()
@@ -587,12 +636,14 @@
         const posterBox = document.createElement('div');
         posterBox.className = 'poster-box';
 
-        // Poster Image with error fallback
+        // Primary Poster with Multi-Tier Fallback
         const img = document.createElement('img');
         img.className = 'poster-img';
         img.alt = item.title;
         img.loading = 'lazy';
-        img.src = `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
+        
+        const primaryPoster = item.poster || `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
+        img.src = primaryPoster;
 
         // Fallback styling
         const fallback = document.createElement('div');
@@ -605,14 +656,19 @@
         `;
 
         img.addEventListener('error', () => {
-          img.style.display = 'none';
-          fallback.style.display = 'flex';
+          if (img.src !== `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`) {
+            // Try OMDB before final typographic fallback
+            img.src = `https://img.omdbapi.com/?i=${item.imdbId}&apikey=thewdb`;
+          } else {
+            img.style.display = 'none';
+            fallback.style.display = 'flex';
+          }
         });
 
         posterBox.appendChild(img);
         posterBox.appendChild(fallback);
 
-        // Card Badges
+        // Card Badges (NEW, TYPE, RATING)
         const badges = document.createElement('div');
         badges.className = 'card-badges';
 
@@ -630,6 +686,14 @@
         typeBadge.className = 'badge badge-type';
         typeBadge.textContent = item.type === 'community' ? 'Arthouse' : item.type.toUpperCase();
         tagGroup.appendChild(typeBadge);
+
+        if (item.rating) {
+          const ratingBadge = document.createElement('span');
+          ratingBadge.className = 'badge badge-rating';
+          ratingBadge.textContent = `★ ${item.rating}`;
+          tagGroup.appendChild(ratingBadge);
+        }
+
         badges.appendChild(tagGroup);
 
         // Watched toggle button

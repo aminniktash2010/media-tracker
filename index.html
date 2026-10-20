@@ -178,6 +178,11 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label for="input-poster" class="form-label">Poster Image URL (optional)</label>
+          <input type="url" id="input-poster" class="form-input" placeholder="https://image.tmdb.org/... or leave empty for auto-detect">
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Title</button>
@@ -202,6 +207,7 @@
           <div class="detail-badges" id="detail-badges"></div>
           <h2 class="detail-heading" id="detail-heading"></h2>
           <div class="detail-meta-row" id="detail-meta-row"></div>
+          <p class="detail-overview" id="detail-overview"></p>
           
           <div class="detail-actions">
             <button id="detail-toggle-watched" class="btn btn-primary"></button>
